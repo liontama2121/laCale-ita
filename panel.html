@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel — La Caleñita</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#F49A2C">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥟</text></svg>">
+  <!-- Guard de sesión: corre antes de pintar nada -->
+  <script>
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('calenita_sesion') || 'null');
+        if (!s || !s.activa) { window.location.replace('login.html'); }
+      } catch (e) { window.location.replace('login.html'); }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/panel.css">
+</head>
+<body class="panel-body">
+
+  <!-- ============ BARRA SUPERIOR ============ -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="topbar-marca" title="Ver sitio público">
+        <span class="topbar-logo" aria-hidden="true">🥟</span>
+        <span>La Caleñita</span>
+      </a>
+      <div class="topbar-usuario">
+        <span class="topbar-nombre">👩‍🍳 <span id="nombreUsuario">Lina</span></span>
+        <button type="button" class="btn btn-outline btn-chico" id="btnSalir">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ BANNER BACKUP ============ -->
+  <div class="banner-backup" id="bannerBackup" hidden role="status">
+    <span id="bannerBackupTexto">⚠️ Recuerda respaldar tus datos</span>
+    <button type="button" class="btn btn-cafe btn-chico" data-ir-tab="backup">Ir a Backup</button>
+  </div>
+
+  <!-- ============ TABS ============ -->
+  <nav class="tabs" aria-label="Secciones del panel">
+    <div class="tabs-scroll" role="tablist">
+      <button type="button" class="tab activa" role="tab" aria-selected="true" aria-controls="tab-nuevo" data-tab="nuevo">🧾 Nuevo Pedido</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-pedidos" data-tab="pedidos">📋 Pedidos <span class="tab-badge" id="badgePedidos" hidden>0</span></button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-finanzas" data-tab="finanzas">💰 Finanzas</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-rifa" data-tab="rifa">🎟️ Rifa</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-backup" data-tab="backup">💾 Backup</button>
+    </div>
+  </nav>
+
+  <main class="panel-main">
+
+    <!-- ============ TAB 1: NUEVO PEDIDO ============ -->
+    <section class="tab-panel activa" id="tab-nuevo" role="tabpanel">
+      <h2 class="panel-titulo">🧾 Nuevo pedido</h2>
+
+      <div class="tarjeta combos-info">
+        <h3 class="sub-titulo mb-0">🎉 Precios y combos</h3>
+        <div class="combos-grid">
+          <div class="combo-card">
+            <span class="combo-n">x4</span>
+            <span class="combo-precio">$11.000</span>
+            <span class="combo-ahorro">Ahorras $1.000</span>
+          </div>
+          <div class="combo-card">
+            <span class="combo-n">x6</span>
+            <span class="combo-precio">$17.000</span>
+            <span class="combo-ahorro">Ahorras $1.000</span>
+          </div>
+        </div>
+        <p class="combos-nota">Suelta $3.000 · El sistema aplica automáticamente el mejor precio</p>
+      </div>
+
+      <form id="formPedido" class="tarjeta mt-2" novalidate>
+        <label class="campo">
+          <span>Nombre del cliente <em>*</em></span>
+          <input type="text" id="pCliente" name="cliente" autocomplete="off" required placeholder="Ej: María López">
+        </label>
+
+        <label class="campo">
+          <span>Conjunto</span>
+          <input type="text" id="pConjunto" name="conjunto" autocomplete="off" placeholder="Ej: Villa del Sol">
+        </label>
+
+        <div class="fila-2">
+          <label class="campo">
+            <span>Torre</span>
+            <input type="text" id="pTorre" name="torre" autocomplete="off" inputmode="numeric" placeholder="3">
+          </label>
+          <label class="campo">
+            <span>Apartamento</span>
+            <input type="text" id="pApto" name="apartamento" autocomplete="off" inputmode="numeric" placeholder="402">
+          </label>
+        </div>
+
+        <fieldset class="sabores-fieldset">
+          <legend>Sabores pedidos</legend>
+          <div class="sabores-lista" id="saboresLista"><!-- generado por JS --></div>
+        </fieldset>
+
+        <div class="total-box">
+          <div class="total-info">
+            <span class="total-label"><span id="pCantidad">0</span> empanadas</span>
+            <span class="total-desglose" id="pDesglose">Agrega empanadas para ver el precio</span>
+            <span class="badge badge-verde total-ahorro" id="pAhorro" hidden></span>
+          </div>
+          <span class="total-valor" id="pTotal">$0</span>
+        </div>
+
+        <label class="toggle">
+          <input type="checkbox" id="pPagado" name="pagado">
+          <span class="toggle-pista" aria-hidden="true"></span>
+          <span class="toggle-texto">¿Ya pagó?</span>
+        </label>
+
+        <label class="campo">
+          <span>Notas (opcional)</span>
+          <textarea id="pNotas" name="notas" rows="2" placeholder="Ej: Sin cebolla, entregar después de las 6pm"></textarea>
+        </label>
+
+        <button type="submit" class="btn btn-naranja btn-bloque btn-grande" id="btnRegistrar">Registrar Pedido</button>
+      </form>
+    </section>
+
+    <!-- ============ TAB 2: PEDIDOS ============ -->
+    <section class="tab-panel" id="tab-pedidos" role="tabpanel" hidden>
+      <h2 class="panel-titulo">📋 Pedidos</h2>
+      <div class="filtros">
+        <div class="filtro-grupo" role="group" aria-label="Filtrar por estado">
+          <button type="button" class="chip activa" data-filtro="todos">Todos</button>
+          <button type="button" class="chip" data-filtro="pagados">Pagados</button>
+          <button type="button" class="chip" data-filtro="pendientes">Pendientes</button>
+        </div>
+        <div class="filtro-fecha">
+          <label for="filtroFecha" class="sr-only">Filtrar por fecha</label>
+          <input type="date" id="filtroFecha">
+          <button type="button" class="btn btn-outline btn-chico" id="btnLimpiarFecha" hidden>✕</button>
+        </div>
+      </div>
+      <p class="resumen-lista" id="pedidosResumen"></p>
+      <div id="pedidosLista" class="pedidos-lista"></div>
+    </section>
+
+    <!-- ============ TAB 3: FINANZAS ============ -->
+    <section class="tab-panel" id="tab-finanzas" role="tabpanel" hidden>
+      <h2 class="panel-titulo">💰 Finanzas</h2>
+
+      <div class="tarjeta">
+        <h3 class="sub-titulo">Inversión y gastos</h3>
+        <button type="button" class="btn btn-naranja btn-bloque btn-grande" id="btnNuevoGasto">+ Registrar inversión / gasto</button>
+        <div id="gastosLista" class="gastos-lista mt-2"></div>
+      </div>
+
+      <div class="tarjeta mt-2">
+        <h3 class="sub-titulo">Resumen</h3>
+        <div class="filtro-grupo" role="group" aria-label="Rango de tiempo">
+          <button type="button" class="chip" data-rango="hoy">Hoy</button>
+          <button type="button" class="chip" data-rango="semana">Esta semana</button>
+          <button type="button" class="chip" data-rango="mes">Este mes</button>
+          <button type="button" class="chip activa" data-rango="todo">Todo</button>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-card dash-cobrado">
+            <span class="dash-icono">💵</span>
+            <span class="dash-label">Ingresos cobrados</span>
+            <span class="dash-valor" id="dCobrado">$0</span>
+          </div>
+          <div class="dash-card dash-pendiente">
+            <span class="dash-icono">⏳</span>
+            <span class="dash-label">Por cobrar</span>
+            <span class="dash-valor" id="dPorCobrar">$0</span>
+          </div>
+          <div class="dash-card dash-gastos">
+            <span class="dash-icono">📉</span>
+            <span class="dash-label">Gastos totales</span>
+            <span class="dash-valor" id="dGastos">$0</span>
+          </div>
+          <div class="dash-card dash-utilidad" id="cardUtilidad">
+            <span class="dash-icono">📈</span>
+            <span class="dash-label">Utilidad neta</span>
+            <span class="dash-valor" id="dUtilidad">$0</span>
+          </div>
+        </div>
+        <p class="contador-empanadas">Empanadas vendidas: <strong id="dEmpanadas">0</strong> 🥟 <span class="contador-sub" id="dPedidos"></span></p>
+      </div>
+    </section>
+
+    <!-- ============ TAB 4: RIFA ============ -->
+    <section class="tab-panel" id="tab-rifa" role="tabpanel" hidden>
+      <h2 class="panel-titulo">🎟️ Rifa de La Caleñita</h2>
+
+      <div class="tarjeta rifa-sorteo">
+        <p class="rifa-contador"><strong id="rifaContador">0</strong> clientes participando</p>
+        <div class="rifa-display" id="rifaDisplay" aria-live="polite">
+          <span class="rifa-numero" id="rifaNumero">????</span>
+          <span class="rifa-nombre" id="rifaNombre">Presiona el botón para sortear</span>
+          <span class="rifa-total" id="rifaTotal"></span>
+        </div>
+        <button type="button" class="btn btn-naranja btn-bloque rifa-boton" id="btnSortear">🎰 SORTEAR GANADOR</button>
+        <button type="button" class="btn btn-outline btn-bloque btn-chico mt-2" id="btnReiniciarRifa">Reiniciar rifa</button>
+      </div>
+
+      <div class="tarjeta mt-2">
+        <h3 class="sub-titulo">Números asignados</h3>
+        <div id="rifaLista" class="rifa-lista"></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 5: BACKUP ============ -->
+    <section class="tab-panel" id="tab-backup" role="tabpanel" hidden>
+      <h2 class="panel-titulo">💾 Backup</h2>
+
+      <div class="tarjeta">
+        <p class="backup-estado" id="backupEstado"></p>
+        <p class="backup-ayuda">Exporta tus datos cada semana y guarda el archivo en Google Drive o WhatsApp. Si cambias de celular o borras el navegador, este archivo es lo único que recupera tus pedidos.</p>
+        <button type="button" class="btn btn-verde btn-bloque btn-grande" id="btnExportar">⬇️ Exportar todos los datos (JSON)</button>
+      </div>
+
+      <div class="tarjeta mt-2">
+        <h3 class="sub-titulo">Restaurar desde archivo</h3>
+        <p class="backup-ayuda">Reemplaza TODOS los datos actuales con los del archivo seleccionado.</p>
+        <label class="btn btn-azul btn-bloque btn-grande input-file-label" for="inputImportar">⬆️ Importar desde JSON</label>
+        <input type="file" id="inputImportar" accept=".json,application/json" class="sr-only">
+      </div>
+
+      <div class="tarjeta tarjeta-peligro mt-2">
+        <h3 class="sub-titulo">Zona peligrosa</h3>
+        <p class="backup-ayuda">Borra pedidos, gastos y configuración de este navegador. No se puede deshacer.</p>
+        <button type="button" class="btn btn-rojo btn-bloque" id="btnBorrarTodo">🗑️ Borrar todo (peligroso)</button>
+      </div>
+    </section>
+
+    <footer class="panel-footer">Hecho con amor por JuanCode 💛</footer>
+  </main>
+
+  <!-- ============ MODAL: PEDIDO REGISTRADO ============ -->
+  <div class="modal-fondo" id="modalPedido" hidden>
+    <div class="modal modal-festivo" role="dialog" aria-modal="true" aria-labelledby="modalPedidoTitulo">
+      <div class="modal-confeti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <h3 id="modalPedidoTitulo">✅ Pedido registrado</h3>
+      <p class="modal-cliente" id="mpCliente"></p>
+      <p class="modal-total">Total: <strong id="mpTotal"></strong></p>
+      <div class="modal-rifa">
+        <span>🎟️ Número de rifa</span>
+        <strong id="mpRifa">0000</strong>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" id="mpCerrar">Cerrar</button>
+        <button type="button" class="btn btn-naranja" id="mpNuevo">Nuevo pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: NUEVO GASTO ============ -->
+  <div class="modal-fondo" id="modalGasto" hidden>
+    <form class="modal" id="formGasto" role="dialog" aria-modal="true" aria-labelledby="modalGastoTitulo" novalidate>
+      <h3 id="modalGastoTitulo">Registrar inversión / gasto</h3>
+      <div class="filtro-grupo tipo-gasto" role="radiogroup" aria-label="Tipo">
+        <label class="chip-radio"><input type="radio" name="gTipo" value="inversion" checked><span>🧺 Inversión (materia prima)</span></label>
+        <label class="chip-radio"><input type="radio" name="gTipo" value="otro"><span>🧾 Otro gasto</span></label>
+      </div>
+      <label class="campo">
+        <span>Descripción <em>*</em></span>
+        <input type="text" id="gDescripcion" required placeholder="Ej: Harina, carne y aceite">
+      </label>
+      <label class="campo">
+        <span>Monto (COP) <em>*</em></span>
+        <input type="number" id="gMonto" inputmode="numeric" min="1" step="1" required placeholder="45000">
+      </label>
+      <label class="campo">
+        <span>Fecha</span>
+        <input type="date" id="gFecha">
+      </label>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" id="gCancelar">Cancelar</button>
+        <button type="submit" class="btn btn-naranja">Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/panel.js"></script>
+</body>
+</html>

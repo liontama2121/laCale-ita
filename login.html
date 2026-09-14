@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de La Caleñita — Ingresar</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#4FB3D9">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/panel.css">
+</head>
+<body class="login-body">
+
+  <main class="login-wrap">
+    <form class="login-card" id="formLogin" novalidate>
+      <div class="login-logo" aria-hidden="true">🥟</div>
+      <h1 class="login-titulo">Panel de La Caleñita</h1>
+      <p class="login-sub">Delicias Vallunas</p>
+
+      <label class="campo">
+        <span>Usuario</span>
+        <input type="text" id="usuario" name="usuario" autocomplete="username" autocapitalize="none" required>
+      </label>
+
+      <label class="campo">
+        <span>Contraseña</span>
+        <span class="campo-clave">
+          <input type="password" id="clave" name="clave" autocomplete="current-password" required>
+          <button type="button" class="btn-ver" id="btnVerClave" aria-label="Mostrar contraseña">👁️</button>
+        </span>
+      </label>
+
+      <button type="submit" class="btn btn-naranja btn-bloque btn-grande mt-2">Entrar</button>
+
+      <a href="index.html" class="login-volver">← Volver al sitio</a>
+    </form>
+    <p class="login-credito">Hecho con amor por JuanCode 💛</p>
+  </main>
+
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
