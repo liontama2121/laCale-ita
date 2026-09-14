@@ -41,13 +41,17 @@ Sesión aparte en `localStorage['calenita_sesion']`.
 Definida en `css/shared.css` como CSS vars.
 
 ## Precios y combos
-- Suelta: $3.000 · Combo x4: $11.000 · Combo x6: $17.000 (sabores se mezclan libremente).
-- `Datos.calcularMejorPrecio(n)` en `js/data.js` devuelve `{precio, desglose:{c6,c4,sueltas}, ahorro}`
-  con la combinación más barata. Se usa en el total en vivo del formulario y al guardar el pedido.
-- Pedido guarda `total`, `totalEmpanadas`, `desgloseCombo`, `ahorroCombo`.
-- Pedidos importados viejos sin `desgloseCombo` se muestran sin etiqueta de combo (no se recalculan).
-- Constantes `PRECIO_UNIDAD`, `PRECIO_COMBO_4`, `PRECIO_COMBO_6` en `data.js`; tarjetas de combos
-  hardcodeadas en `panel.html` (Nuevo Pedido) e `index.html` (menú) — actualizar ambas si cambian precios.
+- Suelta: $3.000 · Combo x4: $11.000 · Combo x6: $17.000.
+- **Los combos NO se aplican automáticamente.** 10 sueltas = $30.000. Un combo existe solo si Lina lo agrega
+  con el botón "+ Combo x4/x6" en el formulario; cada combo elige sus propios sabores y debe estar completo
+  (exactamente 4 o 6) para registrar el pedido.
+- `Datos.cotizar(sueltas, combos)` en `js/data.js` devuelve `{precio, totalEmpanadas, ahorro, desglose, errores}`.
+  Se usa en el total en vivo y al guardar. `errores` no vacío = combo incompleto → botón Registrar deshabilitado.
+- Pedido guarda `sabores` (totales sueltas+combos, para resumen y conteo), `sueltas`, `combos:[{tipo,precio,sabores}]`,
+  `total`, `totalEmpanadas`, `desgloseCombo`, `ahorroCombo`.
+- Pedidos viejos sin `combos` se muestran con `sabores` totales (compatibles).
+- Constantes `PRECIO_UNIDAD`, `PRECIO_COMBO_4`, `PRECIO_COMBO_6` en `data.js`; tarjetas y botones de combos
+  hardcodeados en `panel.html` e `index.html` — actualizar si cambian precios.
 
 Sabores: Papa Carne, Papa Pollo, Ranchera, Queso, Mexicana.
 Lista de sabores en `Datos.SABORES` (`js/data.js`) — única fuente de verdad para el panel.

@@ -21,7 +21,8 @@
     filtroPedidos: 'todos',
     fechaPedidos: '',
     rangoFinanzas: 'todo',
-    cantidades: {},
+    cantidades: {},      // sueltas por sabor
+    combos: [],          // [{ tipo: 4|6, sabores: {...} }]
     ultimoGanador: null,
     sorteando: false
   };
@@ -99,7 +100,18 @@
   // ==========================================================
   var formPedido = $('#formPedido');
   var saboresLista = $('#saboresLista');
+  var combosLista = $('#combosLista');
 
+  function filaSaborHTML(s, n) {
+    return '<span class="sabor-nombre"><span class="emoji" aria-hidden="true">' + s.emoji + '</span>' + esc(s.nombre) + '</span>' +
+      '<div class="contador" role="group" aria-label="Cantidad de ' + esc(s.nombre) + '">' +
+        '<button type="button" data-accion="menos" aria-label="Quitar una ' + esc(s.nombre) + '"' + (n === 0 ? ' disabled' : '') + '>−</button>' +
+        '<span class="cantidad" aria-live="polite">' + n + '</span>' +
+        '<button type="button" data-accion="mas" aria-label="Agregar una ' + esc(s.nombre) + '">+</button>' +
+      '</div>';
+  }
+
+  // ---- Sueltas ----
   function construirSabores() {
     saboresLista.innerHTML = '';
     Datos.SABORES.forEach(function (s) {
@@ -107,13 +119,7 @@
       var fila = document.createElement('div');
       fila.className = 'sabor-fila';
       fila.dataset.sabor = s.id;
-      fila.innerHTML =
-        '<span class="sabor-nombre"><span class="emoji" aria-hidden="true">' + s.emoji + '</span>' + esc(s.nombre) + '</span>' +
-        '<div class="contador" role="group" aria-label="Cantidad de ' + esc(s.nombre) + '">' +
-          '<button type="button" data-accion="menos" aria-label="Quitar una ' + esc(s.nombre) + '" disabled>−</button>' +
-          '<span class="cantidad" aria-live="polite">0</span>' +
-          '<button type="button" data-accion="mas" aria-label="Agregar una ' + esc(s.nombre) + '">+</button>' +
-        '</div>';
+      fila.innerHTML = filaSaborHTML(s, 0);
       saboresLista.appendChild(fila);
     });
   }
@@ -125,34 +131,94 @@
     var id = fila.dataset.sabor;
     var delta = btn.dataset.accion === 'mas' ? 1 : -1;
     estado.cantidades[id] = Math.max(0, Math.min(99, (estado.cantidades[id] || 0) + delta));
-    actualizarFilaSabor(fila, id);
+    actualizarFilaSabor(fila, estado.cantidades[id]);
     actualizarTotalPedido();
   });
 
-  function actualizarFilaSabor(fila, id) {
-    var n = estado.cantidades[id] || 0;
+  function actualizarFilaSabor(fila, n) {
     $('.cantidad', fila).textContent = n;
     $('[data-accion="menos"]', fila).disabled = n === 0;
     fila.classList.toggle('con-cantidad', n > 0);
   }
 
+  // ---- Combos explícitos ----
+  function agregarCombo(tipo) {
+    estado.combos.push({ tipo: tipo, sabores: Datos.saboresVacios() });
+    renderCombos();
+    actualizarTotalPedido();
+    var ultimo = combosLista.lastElementChild;
+    if (ultimo) ultimo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function renderCombos() {
+    combosLista.innerHTML = estado.combos.map(function (c, idx) {
+      var n = Datos.totalDeSabores(c.sabores);
+      var completo = n === c.tipo;
+      return '<div class="combo-bloque' + (completo ? ' completo' : '') + '" data-idx="' + idx + '">' +
+        '<div class="combo-cabecera">' +
+          '<span class="combo-titulo">🎉 Combo x' + c.tipo + ' <span class="combo-precio-chico">' + fmt(Datos.COMBOS[c.tipo]) + '</span></span>' +
+          '<span class="combo-progreso' + (completo ? ' ok' : '') + '">' + n + '/' + c.tipo + (completo ? ' ✅' : '') + '</span>' +
+          '<button type="button" class="btn-icono" data-accion="quitar-combo" aria-label="Quitar combo">🗑️</button>' +
+        '</div>' +
+        '<div class="sabores-lista">' +
+          Datos.SABORES.map(function (s) {
+            return '<div class="sabor-fila' + (c.sabores[s.id] > 0 ? ' con-cantidad' : '') + '" data-sabor="' + s.id + '">' + filaSaborHTML(s, c.sabores[s.id]) + '</div>';
+          }).join('') +
+        '</div>' +
+        (completo ? '' : '<p class="combo-aviso">Elige ' + (c.tipo - n) + ' más para completar el combo</p>') +
+      '</div>';
+    }).join('');
+  }
+
+  combosLista.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-accion]');
+    if (!btn) return;
+    var bloque = btn.closest('.combo-bloque');
+    var idx = Number(bloque.dataset.idx);
+    var combo = estado.combos[idx];
+    if (!combo) return;
+    if (btn.dataset.accion === 'quitar-combo') {
+      estado.combos.splice(idx, 1);
+      renderCombos();
+      actualizarTotalPedido();
+      return;
+    }
+    var id = btn.closest('.sabor-fila').dataset.sabor;
+    var n = Datos.totalDeSabores(combo.sabores);
+    if (btn.dataset.accion === 'mas') {
+      if (n >= combo.tipo) { toast('El combo x' + combo.tipo + ' ya está completo', 'info', 1500); return; }
+      combo.sabores[id]++;
+    } else {
+      combo.sabores[id] = Math.max(0, combo.sabores[id] - 1);
+    }
+    renderCombos();
+    actualizarTotalPedido();
+  });
+
+  $$('[data-agregar-combo]').forEach(function (b) {
+    b.addEventListener('click', function () { agregarCombo(Number(b.dataset.agregarCombo)); });
+  });
+
+  // ---- Total ----
   function actualizarTotalPedido() {
-    var cant = Datos.totalDeSabores(estado.cantidades);
-    var cot = Datos.calcularMejorPrecio(cant);
-    $('#pCantidad').textContent = cant;
+    var cot = Datos.cotizar(estado.cantidades, estado.combos);
+    $('#pCantidad').textContent = cot.totalEmpanadas;
     $('#pTotal').textContent = fmt(cot.precio);
-    $('#pDesglose').textContent = cant ? Datos.textoDesglose(cot.desglose) : 'Agrega empanadas para ver el precio';
+    $('#pDesglose').textContent = cot.totalEmpanadas ? Datos.textoDesglose(cot.desglose) : 'Agrega empanadas para ver el precio';
     var badge = $('#pAhorro');
     badge.hidden = !(cot.ahorro > 0);
-    if (cot.ahorro > 0) badge.textContent = '🎉 ¡Combo aplicado! Ahorra ' + fmt(cot.ahorro);
+    if (cot.ahorro > 0) badge.textContent = '🎉 Ahorra ' + fmt(cot.ahorro) + ' con combo';
+    $('#btnRegistrar').disabled = cot.errores.length > 0;
   }
 
   function limpiarFormPedido() {
     formPedido.reset();
     Datos.SABORES.forEach(function (s) {
       estado.cantidades[s.id] = 0;
-      actualizarFilaSabor($('.sabor-fila[data-sabor="' + s.id + '"]'), s.id);
+      actualizarFilaSabor($('.sabor-fila[data-sabor="' + s.id + '"]', saboresLista), 0);
     });
+    estado.combos = [];
+    renderCombos();
     actualizarTotalPedido();
     $('#pCliente').classList.remove('invalido');
   }
@@ -166,7 +232,13 @@
       toast('Escribe el nombre del cliente', 'error');
       return;
     }
-    if (Datos.totalDeSabores(estado.cantidades) === 0) {
+    var cot = Datos.cotizar(estado.cantidades, estado.combos);
+    if (cot.errores.length) {
+      toast(cot.errores[0], 'error');
+      combosLista.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (cot.totalEmpanadas === 0) {
       toast('Agrega al menos una empanada', 'error');
       saboresLista.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -176,7 +248,8 @@
       conjunto: $('#pConjunto').value,
       torre: $('#pTorre').value,
       apartamento: $('#pApto').value,
-      sabores: estado.cantidades,
+      sueltas: estado.cantidades,
+      combos: estado.combos,
       pagado: $('#pPagado').checked,
       notas: $('#pNotas').value
     });
@@ -214,6 +287,22 @@
       if (n > 0) partes.push(n + ' ' + s.nombre.replace('Papa ', ''));
     });
     return partes.join(', ') || 'Sin productos';
+  }
+
+  // Líneas de productos: una por combo + una de sueltas (pedidos viejos: solo totales)
+  function lineasProductos(p) {
+    var lineas = [];
+    if (Array.isArray(p.combos) && p.combos.length) {
+      p.combos.forEach(function (c) {
+        lineas.push('<span class="pedido-productos"><span class="tag-combo">Combo x' + c.tipo + '</span> ' + esc(resumenSabores(c.sabores || {})) + '</span>');
+      });
+      var ns = Datos.totalDeSabores(p.sueltas || {});
+      if (ns > 0) lineas.push('<span class="pedido-productos">🥟 ' + esc(resumenSabores(p.sueltas)) + ' <span class="pedido-sueltas">(sueltas)</span></span>');
+    } else {
+      lineas.push('<span class="pedido-productos">🥟 ' + esc(resumenSabores(p.sabores || {})) +
+        (etiquetaCombo(p) ? ' <span class="tag-combo">· ' + esc(etiquetaCombo(p)) + '</span>' : '') + '</span>');
+    }
+    return lineas.join('');
   }
 
   function ubicacion(p) {
@@ -260,8 +349,7 @@
           '<span class="pedido-fecha">' + UI.fechaCorta(p.fecha) + '</span>' +
           '<span class="pedido-cliente">' + esc(p.cliente) + '</span>' +
           (ub ? '<span class="pedido-ubicacion">📍 ' + esc(ub) + '</span>' : '') +
-          '<span class="pedido-productos">🥟 ' + esc(resumenSabores(p.sabores || {})) +
-            (etiquetaCombo(p) ? ' <span class="tag-combo">· ' + esc(etiquetaCombo(p)) + '</span>' : '') + '</span>' +
+          lineasProductos(p) +
           (p.notas ? '<span class="pedido-notas">📝 ' + esc(p.notas) + '</span>' : '') +
         '</div>' +
         '<div class="pedido-lado">' +

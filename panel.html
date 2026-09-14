@@ -75,7 +75,7 @@
             <span class="combo-ahorro">Ahorras $1.000</span>
           </div>
         </div>
-        <p class="combos-nota">Suelta $3.000 · El sistema aplica automáticamente el mejor precio</p>
+        <p class="combos-nota">Suelta $3.000 · Los combos se agregan con el botón "+ Combo" y eligen sus propios sabores</p>
       </div>
 
       <form id="formPedido" class="tarjeta mt-2" novalidate>
@@ -101,8 +101,17 @@
         </div>
 
         <fieldset class="sabores-fieldset">
-          <legend>Sabores pedidos</legend>
+          <legend>Empanadas sueltas · $3.000 c/u</legend>
           <div class="sabores-lista" id="saboresLista"><!-- generado por JS --></div>
+        </fieldset>
+
+        <fieldset class="sabores-fieldset combos-fieldset">
+          <legend>Combos</legend>
+          <div class="combos-botones">
+            <button type="button" class="btn btn-azul" data-agregar-combo="4">+ Combo x4 · $11.000</button>
+            <button type="button" class="btn btn-azul" data-agregar-combo="6">+ Combo x6 · $17.000</button>
+          </div>
+          <div id="combosLista" class="combos-lista"><!-- generado por JS --></div>
         </fieldset>
 
         <div class="total-box">

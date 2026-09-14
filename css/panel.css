@@ -362,6 +362,47 @@
   vertical-align: middle;
 }
 
+/* Combos explícitos dentro del formulario */
+.combos-fieldset { border-color: rgba(30, 58, 95, 0.35); }
+.combos-botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.combos-botones .btn { font-size: 0.95rem; padding: 10px 8px; white-space: normal; text-align: center; }
+.combos-lista { display: flex; flex-direction: column; gap: 10px; }
+.combos-lista:empty { display: none; }
+.combo-bloque {
+  background: var(--crema-claro);
+  border: 2px dashed var(--azul-profundo);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.combo-bloque.completo { border-style: solid; border-color: var(--verde); background: #F3F9EA; }
+.combo-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.combo-titulo { flex: 1; font-family: var(--font-titulo); font-weight: 700; font-size: 1.05rem; color: var(--azul-profundo); }
+.combo-precio-chico { font-family: var(--font-cuerpo); font-size: 0.85rem; font-weight: 800; opacity: 0.8; }
+.combo-progreso {
+  font-weight: 800;
+  font-size: 0.9rem;
+  background: var(--amarillo);
+  color: var(--cafe);
+  padding: 2px 10px;
+  border-radius: var(--radio-pill);
+  white-space: nowrap;
+}
+.combo-progreso.ok { background: var(--verde); color: var(--blanco); }
+.combo-bloque .sabor-fila { padding: 3px 0; }
+.combo-bloque .contador button { width: 42px; height: 42px; font-size: 1.3rem; }
+.combo-aviso { margin: 6px 0 0; font-size: 0.82rem; font-weight: 700; color: var(--cafe-medio); text-align: center; }
+.pedido-sueltas { font-size: 0.8rem; font-weight: 600; opacity: 0.7; }
+
 /* Tarjeta informativa de combos */
 .combos-info { gap: 12px; }
 .combos-grid {

@@ -95,33 +95,56 @@
     return n;
   }
 
-  // Mejor precio posible combinando combos x6, x4 y unidades sueltas
-  function calcularMejorPrecio(totalEmpanadas) {
-    totalEmpanadas = Math.max(0, parseInt(totalEmpanadas, 10) || 0);
-    if (totalEmpanadas === 0) {
-      return { precio: 0, desglose: { c6: 0, c4: 0, sueltas: 0 }, ahorro: 0 };
-    }
-    var mejorPrecio = Infinity;
-    var mejorDesglose = null;
-    var max6 = Math.floor(totalEmpanadas / 6);
-    // De mayor a menor: en empates de precio (x6 = x4 + 2 sueltas) gana el combo grande
-    for (var c6 = max6; c6 >= 0; c6--) {
-      var trasC6 = totalEmpanadas - c6 * 6;
-      var max4 = Math.floor(trasC6 / 4);
-      for (var c4 = 0; c4 <= max4; c4++) {
-        var sueltas = trasC6 - c4 * 4;
-        var precioActual = c6 * PRECIO_COMBO_6 + c4 * PRECIO_COMBO_4 + sueltas * PRECIO_UNIDAD;
-        if (precioActual < mejorPrecio) {
-          mejorPrecio = precioActual;
-          mejorDesglose = { c6: c6, c4: c4, sueltas: sueltas };
-        }
-      }
-    }
-    var precioSinCombo = totalEmpanadas * PRECIO_UNIDAD;
+  var COMBOS = {
+    4: PRECIO_COMBO_4,
+    6: PRECIO_COMBO_6
+  };
+
+  function saboresVacios() {
+    var o = {};
+    SABORES.forEach(function (s) { o[s.id] = 0; });
+    return o;
+  }
+
+  function limpiarSabores(sabores) {
+    var o = saboresVacios();
+    SABORES.forEach(function (s) {
+      o[s.id] = Math.max(0, parseInt(sabores && sabores[s.id], 10) || 0);
+    });
+    return o;
+  }
+
+  // Cotiza un pedido: sueltas a precio unidad + combos explícitos a precio fijo.
+  // combos: [{ tipo: 4|6, sabores: {carne: 2, queso: 2} }]
+  // No aplica combos automáticamente: 10 sueltas = 10 × $3.000.
+  function cotizar(sueltas, combos) {
+    sueltas = limpiarSabores(sueltas);
+    combos = Array.isArray(combos) ? combos : [];
+    var nSueltas = totalDeSabores(sueltas);
+    var precio = nSueltas * PRECIO_UNIDAD;
+    var totalEmpanadas = nSueltas;
+    var desglose = { c6: 0, c4: 0, sueltas: nSueltas };
+    var errores = [];
+    var combosLimpios = combos.map(function (c, idx) {
+      var tipo = Number(c.tipo);
+      var sab = limpiarSabores(c.sabores);
+      var n = totalDeSabores(sab);
+      if (!COMBOS[tipo]) errores.push('Combo #' + (idx + 1) + ' inválido');
+      else if (n !== tipo) errores.push('Combo x' + tipo + ' #' + (idx + 1) + ' tiene ' + n + ' de ' + tipo + ' empanadas');
+      precio += COMBOS[tipo] || 0;
+      totalEmpanadas += n;
+      if (tipo === 6) desglose.c6++;
+      if (tipo === 4) desglose.c4++;
+      return { tipo: tipo, precio: COMBOS[tipo] || 0, sabores: sab };
+    });
     return {
-      precio: mejorPrecio,
-      desglose: mejorDesglose,
-      ahorro: precioSinCombo - mejorPrecio
+      precio: precio,
+      totalEmpanadas: totalEmpanadas,
+      ahorro: totalEmpanadas * PRECIO_UNIDAD - precio,
+      desglose: desglose,
+      sueltas: sueltas,
+      combos: combosLimpios,
+      errores: errores
     };
   }
 
@@ -151,10 +174,14 @@
 
   function agregarPedido(datos) {
     var d = cargar();
-    var sabores = {};
-    SABORES.forEach(function (s) { sabores[s.id] = Math.max(0, parseInt(datos.sabores && datos.sabores[s.id], 10) || 0); });
-    var cantidad = totalDeSabores(sabores);
-    var cotizacion = calcularMejorPrecio(cantidad);
+    // Compatibilidad: si llega solo `sabores` (formato viejo), se tratan como sueltas
+    var cot = cotizar(datos.sueltas || datos.sabores, datos.combos);
+    if (cot.errores.length) throw new Error(cot.errores[0]);
+    // Totales por sabor (sueltas + combos) para resumen y conteo de empanadas
+    var totales = limpiarSabores(cot.sueltas);
+    cot.combos.forEach(function (c) {
+      SABORES.forEach(function (s) { totales[s.id] += c.sabores[s.id]; });
+    });
     var pedido = {
       id: siguienteId(d.pedidos),
       fecha: new Date().toISOString(),
@@ -162,11 +189,13 @@
       conjunto: String(datos.conjunto || '').trim(),
       torre: String(datos.torre || '').trim(),
       apartamento: String(datos.apartamento || '').trim(),
-      sabores: sabores,
-      total: cotizacion.precio,
-      totalEmpanadas: cantidad,
-      desgloseCombo: cotizacion.desglose,
-      ahorroCombo: cotizacion.ahorro,
+      sabores: totales,
+      sueltas: cot.sueltas,
+      combos: cot.combos,
+      total: cot.precio,
+      totalEmpanadas: cot.totalEmpanadas,
+      desgloseCombo: cot.desglose,
+      ahorroCombo: cot.ahorro,
       pagado: !!datos.pagado,
       numeroRifa: numeroRifaUnico(),
       notas: String(datos.notas || '').trim()
@@ -323,8 +352,10 @@
   global.Datos = {
     SABORES: SABORES,
     PRECIOS: { unidad: PRECIO_UNIDAD, combo4: PRECIO_COMBO_4, combo6: PRECIO_COMBO_6 },
+    COMBOS: COMBOS,
     precio: precio,
-    calcularMejorPrecio: calcularMejorPrecio,
+    cotizar: cotizar,
+    saboresVacios: saboresVacios,
     textoDesglose: textoDesglose,
     textoCombos: textoCombos,
     cargar: cargar,
