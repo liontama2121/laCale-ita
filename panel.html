@@ -81,7 +81,9 @@
       <form id="formPedido" class="tarjeta mt-2" novalidate>
         <label class="campo">
           <span>Nombre del cliente <em>*</em></span>
-          <input type="text" id="pCliente" name="cliente" autocomplete="off" required placeholder="Ej: María López">
+          <input type="text" id="pCliente" name="cliente" autocomplete="off" list="listaClientes" required placeholder="Ej: María López">
+          <datalist id="listaClientes"></datalist>
+          <small class="campo-ayuda" id="pClienteAyuda" hidden></small>
         </label>
 
         <label class="campo">

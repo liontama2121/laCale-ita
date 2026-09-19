@@ -57,6 +57,12 @@ Sabores: Papa Carne, Papa Pollo, Ranchera, Queso, Mexicana.
 Lista de sabores en `Datos.SABORES` (`js/data.js`) — única fuente de verdad para el panel.
 La landing tiene el menú hardcodeado en `index.html`.
 
+## Clientes
+No hay tabla de clientes: se derivan de `pedidos` con `Datos.clientes()` / `Datos.buscarCliente(nombre)` (`js/data.js`).
+Clave sin tildes/mayúsculas/espacios dobles ("María" = "maria"). Al registrar pedido de un cliente existente se reutiliza
+el nombre tal como está guardado. El input `#pCliente` tiene `<datalist>` con sugerencias y autollena conjunto/torre/apto
+solo si están vacíos. Nada de esto modifica pedidos viejos.
+
 ## WhatsApp
 3160996970 (enlaces `wa.me/573160996970` en `index.html`)
 

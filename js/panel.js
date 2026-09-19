@@ -221,6 +221,8 @@
     renderCombos();
     actualizarTotalPedido();
     $('#pCliente').classList.remove('invalido');
+    $('#pClienteAyuda').hidden = true;
+    renderListaClientes();
   }
 
   formPedido.addEventListener('submit', function (e) {
@@ -259,7 +261,31 @@
     actualizarBanner();
   });
 
-  $('#pCliente').addEventListener('input', function () { this.classList.remove('invalido'); });
+  // ---- Clientes existentes: sugerencias + autollenado para no repetir clientes ----
+  function renderListaClientes() {
+    $('#listaClientes').innerHTML = Datos.clientes().map(function (c) {
+      return '<option value="' + esc(c.nombre) + '"></option>';
+    }).join('');
+  }
+
+  function revisarClienteExistente() {
+    var input = $('#pCliente');
+    var ayuda = $('#pClienteAyuda');
+    var c = Datos.buscarCliente(input.value);
+    if (!c) { ayuda.hidden = true; ayuda.textContent = ''; return; }
+    // Rellena solo los campos vacíos, nunca pisa lo que Lina ya escribió
+    if (!$('#pConjunto').value.trim() && c.conjunto) $('#pConjunto').value = c.conjunto;
+    if (!$('#pTorre').value.trim() && c.torre) $('#pTorre').value = c.torre;
+    if (!$('#pApto').value.trim() && c.apartamento) $('#pApto').value = c.apartamento;
+    ayuda.textContent = '✅ Cliente ya registrado · ' + c.pedidos + (c.pedidos === 1 ? ' pedido' : ' pedidos');
+    ayuda.hidden = false;
+  }
+
+  $('#pCliente').addEventListener('input', function () {
+    this.classList.remove('invalido');
+    revisarClienteExistente();
+  });
+  $('#pCliente').addEventListener('change', revisarClienteExistente);
 
   // Modal de confirmación de pedido
   var modalPedido = $('#modalPedido');

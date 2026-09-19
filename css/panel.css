@@ -82,6 +82,11 @@
   box-shadow: 0 0 0 4px rgba(244, 154, 44, 0.25);
 }
 .campo input.invalido { border-color: var(--rojo); }
+.campo-ayuda {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--verde);
+}
 .campo-clave { position: relative; display: block; }
 .campo-clave input { padding-right: 52px; }
 .btn-ver {

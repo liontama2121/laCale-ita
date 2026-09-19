@@ -172,6 +172,47 @@
     return cant;
   }
 
+  // ---------- Clientes ----------
+  // Los clientes no se guardan aparte: se derivan de los pedidos existentes.
+  // Clave sin tildes, espacios dobles ni mayúsculas para no repetir "María" / "maria".
+  // Rango de marcas diacríticas (U+0300–U+036F) construido sin escapes para que ningún editor lo altere
+  var TILDES = new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g');
+  function claveCliente(nombre) {
+    return String(nombre || '')
+      .normalize('NFD').replace(TILDES, '')
+      .toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  // Lista única de clientes con sus datos más recientes y cantidad de pedidos
+  function clientes() {
+    var mapa = {};
+    cargar().pedidos.forEach(function (p) {
+      var clave = claveCliente(p.cliente);
+      if (!clave) return;
+      var c = mapa[clave];
+      if (!c) {
+        c = mapa[clave] = { clave: clave, nombre: '', conjunto: '', torre: '', apartamento: '', pedidos: 0, ultimoPedido: '' };
+      }
+      c.pedidos++;
+      // El pedido más reciente manda en nombre y dirección
+      if (!c.ultimoPedido || p.fecha > c.ultimoPedido) {
+        c.ultimoPedido = p.fecha;
+        c.nombre = p.cliente;
+        if (p.conjunto) c.conjunto = p.conjunto;
+        if (p.torre) c.torre = p.torre;
+        if (p.apartamento) c.apartamento = p.apartamento;
+      }
+    });
+    return Object.keys(mapa).map(function (k) { return mapa[k]; })
+      .sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); });
+  }
+
+  function buscarCliente(nombre) {
+    var clave = claveCliente(nombre);
+    if (!clave) return null;
+    return clientes().find(function (c) { return c.clave === clave; }) || null;
+  }
+
   function agregarPedido(datos) {
     var d = cargar();
     // Compatibilidad: si llega solo `sabores` (formato viejo), se tratan como sueltas
@@ -185,7 +226,8 @@
     var pedido = {
       id: siguienteId(d.pedidos),
       fecha: new Date().toISOString(),
-      cliente: String(datos.cliente || '').trim(),
+      // Si el cliente ya existe se usa el nombre como está guardado, para no duplicarlo
+      cliente: (buscarCliente(datos.cliente) || {}).nombre || String(datos.cliente || '').trim(),
       conjunto: String(datos.conjunto || '').trim(),
       torre: String(datos.torre || '').trim(),
       apartamento: String(datos.apartamento || '').trim(),
@@ -361,6 +403,8 @@
     cargar: cargar,
     pedidos: pedidos,
     agregarPedido: agregarPedido,
+    clientes: clientes,
+    buscarCliente: buscarCliente,
     marcarPagado: marcarPagado,
     eliminarPedido: eliminarPedido,
     totalDeSabores: totalDeSabores,
