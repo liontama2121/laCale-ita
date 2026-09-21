@@ -1,3 +1,8 @@
 .DS_Store
 Thumbs.db
 node_modules/
+
+# Backups con datos de clientas (nombres, direcciones). Repo publico: NUNCA commitear.
+backups/
+*.mp4
+audio/
