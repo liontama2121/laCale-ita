@@ -165,6 +165,38 @@
 .topbar-nombre { font-weight: 800; font-size: 0.95rem; }
 @media (max-width: 380px) { .topbar-nombre { display: none; } }
 
+/* Estado de sincronizacion con D1 */
+.sync-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cafe-medio);
+  white-space: nowrap;
+}
+.sync-punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--verde);
+  flex: 0 0 auto;
+  transition: background var(--transicion);
+}
+.sync-punto.es-pendiente { background: var(--amarillo); animation: sync-late 1.4s ease-in-out infinite; }
+.sync-punto.es-offline   { background: var(--cafe-medio); }
+.sync-punto.es-error     { background: var(--rojo); }
+
+@keyframes sync-late {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sync-punto.es-pendiente { animation: none; }
+}
+/* En pantallas chicas queda solo el punto de color */
+@media (max-width: 560px) { #syncTexto { display: none; } }
+
 /* ---------- Banner backup ---------- */
 .banner-backup {
   background: var(--amarillo);

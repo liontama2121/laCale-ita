@@ -1,18 +1,13 @@
 /* ==========================================================
-   auth.js — login, logout y guard de sesión
-   Cambiar CREDENCIALES antes de deploy.
+   auth.js — login, logout y guard de sesión.
+   La contraseña ya NO vive acá: la valida /api/login contra los secretos
+   del proyecto. Este archivo solo guarda el token que devuelve el servidor.
+   Cambiar la clave: npx wrangler pages secret put PANEL_CLAVE
    ========================================================== */
 (function (global) {
   'use strict';
 
-  var CREDENCIALES = {
-    usuario: 'lina',
-    clave: 'calenita2026'
-  };
-
   var KEY_SESION = 'calenita_sesion';
-  // Sesión expira a los 30 días de inactividad
-  var DURACION_MS = 30 * 24 * 60 * 60 * 1000;
 
   function leerSesion() {
     try {
@@ -23,32 +18,29 @@
     }
   }
 
+  // El token trae su propio vencimiento firmado; si venció, la API responde 401
+  // y Api borra el token. Offline seguimos adentro con lo que hay en caché.
   function haySesion() {
-    var s = leerSesion();
-    if (!s || !s.activa) return false;
-    if (Date.now() - (s.inicio || 0) > DURACION_MS) {
-      cerrarSesion(false);
-      return false;
-    }
-    return true;
+    return global.Api ? global.Api.hayToken() : false;
   }
 
   function iniciarSesion(usuario, clave) {
-    var u = String(usuario || '').trim().toLowerCase();
-    var c = String(clave || '');
-    if (u === CREDENCIALES.usuario && c === CREDENCIALES.clave) {
-      localStorage.setItem(KEY_SESION, JSON.stringify({
-        activa: true,
-        usuario: 'Lina',
-        inicio: Date.now()
-      }));
-      return true;
-    }
-    return false;
+    return global.Api.login(String(usuario || '').trim(), String(clave || ''))
+      .then(function (r) {
+        try {
+          localStorage.setItem(KEY_SESION, JSON.stringify({
+            activa: true,
+            usuario: r.usuario || 'Lina',
+            inicio: Date.now()
+          }));
+        } catch (e) { /* sin localStorage igual quedó el token en memoria */ }
+        return true;
+      });
   }
 
   function cerrarSesion(redirigir) {
     localStorage.removeItem(KEY_SESION);
+    if (global.Api) global.Api.guardarToken('');
     if (redirigir !== false) window.location.href = 'login.html';
   }
 
@@ -88,6 +80,7 @@
     var inputUsuario = document.getElementById('usuario');
     var inputClave = document.getElementById('clave');
     var btnVer = document.getElementById('btnVerClave');
+    var btnEntrar = form.querySelector('button[type="submit"]');
 
     if (btnVer) {
       btnVer.addEventListener('click', function () {
@@ -98,20 +91,30 @@
       });
     }
 
+    function fallar(msg) {
+      if (global.mostrarToast) global.mostrarToast(msg, 'error');
+      inputClave.value = '';
+      inputClave.focus();
+      form.classList.remove('sacudir');
+      void form.offsetWidth; // reinicia animación
+      form.classList.add('sacudir');
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (iniciarSesion(inputUsuario.value, inputClave.value)) {
-        window.location.href = 'panel.html';
-      } else {
-        if (global.mostrarToast) {
-          global.mostrarToast('Usuario o contraseña incorrectos', 'error');
-        }
-        inputClave.value = '';
-        inputClave.focus();
-        form.classList.remove('sacudir');
-        void form.offsetWidth; // reinicia animación
-        form.classList.add('sacudir');
-      }
+      if (btnEntrar.disabled) return;
+      btnEntrar.disabled = true;
+      btnEntrar.textContent = 'Entrando…';
+
+      iniciarSesion(inputUsuario.value, inputClave.value)
+        .then(function () {
+          window.location.href = 'panel.html';
+        })
+        .catch(function (err) {
+          btnEntrar.disabled = false;
+          btnEntrar.textContent = 'Entrar';
+          fallar(err && err.red ? 'Sin internet: la primera entrada necesita conexión' : (err.message || 'No se pudo entrar'));
+        });
     });
   });
 })(window);

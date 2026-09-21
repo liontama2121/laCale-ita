@@ -397,7 +397,7 @@
     var btn = e.target.closest('button[data-accion]');
     if (!btn) return;
     var card = btn.closest('.pedido-card');
-    var id = Number(card.dataset.id);
+    var id = card.dataset.id;
     var accion = btn.dataset.accion;
 
     if (accion === 'pagar') {
@@ -504,7 +504,7 @@
   $('#gastosLista').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-accion="eliminar-gasto"]');
     if (!btn) return;
-    var id = Number(btn.closest('.gasto-item').dataset.id);
+    var id = btn.closest('.gasto-item').dataset.id;
     var g = Datos.gastos().find(function (x) { return x.id === id; });
     UI.confirmar({
       titulo: '¿Eliminar gasto?',
@@ -757,18 +757,86 @@
   // ==========================================================
   // INICIO
   // ==========================================================
-  function refrescarTodo() {
-    limpiarFormPedido();
+  // Solo listas y totales: NO toca el formulario que Lina pueda estar llenando
+  function refrescarDatos() {
     renderPedidos();
     renderFinanzas();
     renderRifa();
     renderBackup();
+    renderListaClientes();
     actualizarBadgePedidos();
     actualizarBanner();
   }
 
+  function refrescarTodo() {
+    limpiarFormPedido();
+    refrescarDatos();
+  }
+
+  // ==========================================================
+  // SINCRONIZACIÓN (D1)
+  // ==========================================================
+  var CADA_MS = 10000;
+
+  function pintarEstadoSync() {
+    var e = Datos.estado();
+    var punto = $('#syncPunto');
+    var texto = $('#syncTexto');
+    var clase = 'sync-punto';
+    var msg;
+
+    if (e.conexion === 'ok' && !e.pendientes) { msg = 'Al día'; }
+    else if (e.pendientes) { clase += ' es-pendiente'; msg = e.pendientes + ' sin subir'; }
+    else if (e.conexion === 'sin-red') { clase += ' es-offline'; msg = 'Sin internet'; }
+    else if (e.conexion === 'sin-sesion') { clase += ' es-error'; msg = 'Sesión vencida'; }
+    else if (e.conexion === 'error') { clase += ' es-error'; msg = 'Error al sincronizar'; }
+    else { msg = 'Conectando…'; }
+
+    punto.className = clase;
+    texto.textContent = msg;
+  }
+
+  var avisoSesion = false;
+  function sincronizar(silencioso) {
+    return Datos.sincronizar()
+      .then(function (r) {
+        pintarEstadoSync();
+        if (r.cambios && !silencioso) toast('Datos actualizados', 'info');
+        return r;
+      })
+      .catch(function (err) {
+        pintarEstadoSync();
+        if (err && err.noAutorizado && !avisoSesion) {
+          avisoSesion = true;
+          toast('La sesión venció, hay que entrar de nuevo', 'error');
+          setTimeout(function () { Auth.cerrarSesion(); }, 2500);
+        } else if (!silencioso && err && err.red) {
+          toast('Sin internet: los cambios se suben solos al volver', 'info');
+        }
+      });
+  }
+
+  // La UI se repinta sola cuando entran datos nuevos o cambia la cola
+  Datos.alCambiar(function () {
+    pintarEstadoSync();
+    refrescarDatos();
+  });
+
+  setInterval(function () {
+    if (!document.hidden) sincronizar(true);
+  }, CADA_MS);
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) sincronizar(true);
+  });
+  window.addEventListener('online', function () { sincronizar(true); });
+
   construirSabores();
   refrescarTodo();
+  pintarEstadoSync();
+
+  // Primera bajada: trae lo que hayan registrado en los otros equipos
+  sincronizar(true).then(function () { refrescarDatos(); });
 
   var tabGuardada = null;
   try { tabGuardada = sessionStorage.getItem('calenita_tab'); } catch (e) { /* ignorar */ }

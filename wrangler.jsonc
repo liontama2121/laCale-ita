@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "empanadacale",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-05-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "calenita",
+      "database_id": "PENDIENTE-wrangler-d1-create"
+    }
+  ]
+}

@@ -1,11 +1,14 @@
 /* ==========================================================
-   data.js — capa de acceso a localStorage + export/import
-   Todo se guarda bajo localStorage['calenita_datos']
+   data.js — capa de datos: caché en localStorage + sincronización con D1.
+   localStorage['calenita_datos'] es la caché local (y lo que se ve sin internet).
+   localStorage['calenita_sync']  guarda el cursor y la cola de cambios sin subir.
+   La fuente de verdad compartida es D1, vía /api/sync.
    ========================================================== */
 (function (global) {
   'use strict';
 
   var KEY = 'calenita_datos';
+  var KEY_SYNC = 'calenita_sync';
   var PRECIO_DEFAULT = 3000;
 
   // Precios y combos (los sabores se mezclan libremente)
@@ -33,11 +36,12 @@
   }
 
   // Normaliza cualquier objeto a la forma esperada (útil al importar)
+  // Los ids se fuerzan a texto: los viejos eran números y los nuevos son UUID.
   function normalizar(obj) {
     var base = estadoInicial();
     if (!obj || typeof obj !== 'object') return base;
-    base.pedidos = Array.isArray(obj.pedidos) ? obj.pedidos : [];
-    base.gastos = Array.isArray(obj.gastos) ? obj.gastos : [];
+    base.pedidos = (Array.isArray(obj.pedidos) ? obj.pedidos : []).map(conIdTexto);
+    base.gastos = (Array.isArray(obj.gastos) ? obj.gastos : []).map(conIdTexto);
     if (obj.config && typeof obj.config === 'object') {
       base.config.precioEmpanada = Number(obj.config.precioEmpanada) || PRECIO_DEFAULT;
       base.config.ultimoBackup = obj.config.ultimoBackup || null;
@@ -70,8 +74,82 @@
     }
   }
 
-  function siguienteId(lista) {
-    return lista.reduce(function (max, item) { return Math.max(max, Number(item.id) || 0); }, 0) + 1;
+  function conIdTexto(item) {
+    if (item && item.id != null) item.id = String(item.id);
+    return item;
+  }
+
+  // UUID: dos equipos sin señal no pueden generar el mismo id (los correlativos sí chocaban)
+  function nuevoId() {
+    if (global.crypto && global.crypto.randomUUID) return global.crypto.randomUUID();
+    return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+
+  // ---------- Cola de sincronización ----------
+  // pendientes: { pedidos: { <id>: 'upsert' | 'borrar' }, gastos: {...}, config: bool }
+  var sync = null;
+
+  function estadoSyncInicial() {
+    return { cursor: 0, pendientes: { pedidos: {}, gastos: {}, config: false } };
+  }
+
+  function cargarSync() {
+    if (sync) return sync;
+    try {
+      var raw = localStorage.getItem(KEY_SYNC);
+      var s = raw ? JSON.parse(raw) : null;
+      sync = s && typeof s === 'object' ? s : estadoSyncInicial();
+      sync.cursor = Number(sync.cursor) || 0;
+      if (!sync.pendientes || typeof sync.pendientes !== 'object') sync.pendientes = { pedidos: {}, gastos: {}, config: false };
+      if (!sync.pendientes.pedidos) sync.pendientes.pedidos = {};
+      if (!sync.pendientes.gastos) sync.pendientes.gastos = {};
+    } catch (e) {
+      sync = estadoSyncInicial();
+    }
+    return sync;
+  }
+
+  function guardarSync() {
+    try {
+      localStorage.setItem(KEY_SYNC, JSON.stringify(sync || estadoSyncInicial()));
+    } catch (e) { /* sin espacio: la cola se pierde, los datos locales no */ }
+  }
+
+  function marcar(tipo, id, accion) {
+    var s = cargarSync();
+    if (tipo === 'config') s.pendientes.config = true;
+    else s.pendientes[tipo][String(id)] = accion || 'upsert';
+    guardarSync();
+    avisarCambio();
+  }
+
+  function haySinSubir() {
+    var s = cargarSync();
+    return Object.keys(s.pendientes.pedidos).length + Object.keys(s.pendientes.gastos).length > 0 || !!s.pendientes.config;
+  }
+
+  // ---------- Avisos a la interfaz ----------
+  var oyentes = [];
+  var callado = 0;
+
+  function alCambiar(fn) {
+    if (typeof fn === 'function') oyentes.push(fn);
+  }
+
+  function avisarCambio() {
+    if (callado > 0) return;
+    oyentes.forEach(function (fn) {
+      try { fn(); } catch (e) { console.error(e); }
+    });
+  }
+
+  // Agrupa una operación masiva en un solo aviso a la UI
+  function enLote(fn) {
+    callado++;
+    try { return fn(); } finally {
+      callado--;
+      avisarCambio();
+    }
   }
 
   // ---------- Config ----------
@@ -224,7 +302,7 @@
       SABORES.forEach(function (s) { totales[s.id] += c.sabores[s.id]; });
     });
     var pedido = {
-      id: siguienteId(d.pedidos),
+      id: nuevoId(),
       fecha: new Date().toISOString(),
       // Si el cliente ya existe se usa el nombre como está guardado, para no duplicarlo
       cliente: (buscarCliente(datos.cliente) || {}).nombre || String(datos.cliente || '').trim(),
@@ -244,23 +322,26 @@
     };
     d.pedidos.push(pedido);
     guardar();
+    marcar('pedidos', pedido.id, 'upsert');
     return pedido;
   }
 
   function marcarPagado(id, valor) {
     var d = cargar();
-    var p = d.pedidos.find(function (x) { return x.id === id; });
+    var p = d.pedidos.find(function (x) { return String(x.id) === String(id); });
     if (!p) return null;
     p.pagado = valor === undefined ? true : !!valor;
     guardar();
+    marcar('pedidos', p.id, 'upsert');
     return p;
   }
 
   function eliminarPedido(id) {
     var d = cargar();
     var antes = d.pedidos.length;
-    d.pedidos = d.pedidos.filter(function (x) { return x.id !== id; });
+    d.pedidos = d.pedidos.filter(function (x) { return String(x.id) !== String(id); });
     guardar();
+    if (d.pedidos.length < antes) marcar('pedidos', id, 'borrar');
     return d.pedidos.length < antes;
   }
 
@@ -272,7 +353,7 @@
   function agregarGasto(datos) {
     var d = cargar();
     var gasto = {
-      id: siguienteId(d.gastos),
+      id: nuevoId(),
       fecha: datos.fecha || new Date().toISOString().slice(0, 10),
       tipo: datos.tipo === 'otro' ? 'otro' : 'inversion',
       descripcion: String(datos.descripcion || '').trim(),
@@ -280,22 +361,29 @@
     };
     d.gastos.push(gasto);
     guardar();
+    marcar('gastos', gasto.id, 'upsert');
     return gasto;
   }
 
   function eliminarGasto(id) {
     var d = cargar();
     var antes = d.gastos.length;
-    d.gastos = d.gastos.filter(function (x) { return x.id !== id; });
+    d.gastos = d.gastos.filter(function (x) { return String(x.id) !== String(id); });
     guardar();
+    if (d.gastos.length < antes) marcar('gastos', id, 'borrar');
     return d.gastos.length < antes;
   }
 
   // ---------- Rifa ----------
   function reiniciarRifa() {
     var d = cargar();
-    d.pedidos.forEach(function (p) { p.numeroRifa = null; });
-    guardar();
+    enLote(function () {
+      d.pedidos.forEach(function (p) {
+        p.numeroRifa = null;
+        marcar('pedidos', p.id, 'upsert');
+      });
+      guardar();
+    });
   }
 
   // ---------- Resumen financiero ----------
@@ -351,6 +439,7 @@
     var d = cargar();
     d.config.ultimoBackup = new Date().toISOString();
     guardar();
+    marcar('config');
     var payload = {
       pedidos: d.pedidos,
       gastos: d.gastos,
@@ -376,6 +465,12 @@
     // Un import cuenta como backup reciente (los datos ya existen en archivo)
     if (!cache.config.ultimoBackup) cache.config.ultimoBackup = new Date().toISOString();
     guardar();
+    // Lo importado se sube entero: el import manda sobre lo que haya en el servidor
+    enLote(function () {
+      cache.pedidos.forEach(function (p) { marcar('pedidos', p.id, 'upsert'); });
+      cache.gastos.forEach(function (g) { marcar('gastos', g.id, 'upsert'); });
+      marcar('config');
+    });
     return { pedidos: cache.pedidos.length, gastos: cache.gastos.length };
   }
 
@@ -386,9 +481,149 @@
     return Math.floor(ms / 86400000);
   }
 
+  // Borra en este equipo Y en el servidor (viaja como lápida a los demás)
   function borrarTodo() {
+    var d = cargar();
+    enLote(function () {
+      d.pedidos.forEach(function (p) { marcar('pedidos', p.id, 'borrar'); });
+      d.gastos.forEach(function (g) { marcar('gastos', g.id, 'borrar'); });
+    });
     cache = estadoInicial();
     localStorage.removeItem(KEY);
+    avisarCambio();
+  }
+
+  // ==========================================================
+  // Sincronización con D1
+  // ==========================================================
+  var sincronizando = null;   // promesa en curso, para no pisarse
+  var estadoConexion = 'sin-probar'; // 'ok' | 'sin-red' | 'sin-sesion' | 'error'
+
+  function estado() {
+    return {
+      conexion: estadoConexion,
+      pendientes: cantidadPendientes(),
+      cursor: cargarSync().cursor
+    };
+  }
+
+  function cantidadPendientes() {
+    var s = cargarSync();
+    return Object.keys(s.pendientes.pedidos).length + Object.keys(s.pendientes.gastos).length;
+  }
+
+  // Arma el lote a subir leyendo los registros vivos de la caché
+  function armarLote() {
+    var d = cargar();
+    var s = cargarSync();
+    var lote = { desde: s.cursor, pedidos: [], gastos: [], config: {} };
+
+    Object.keys(s.pendientes.pedidos).forEach(function (id) {
+      if (s.pendientes.pedidos[id] === 'borrar') {
+        lote.pedidos.push({ id: id, borrado: true });
+        return;
+      }
+      var p = d.pedidos.find(function (x) { return String(x.id) === id; });
+      if (p) lote.pedidos.push(p);
+    });
+
+    Object.keys(s.pendientes.gastos).forEach(function (id) {
+      if (s.pendientes.gastos[id] === 'borrar') {
+        lote.gastos.push({ id: id, borrado: true });
+        return;
+      }
+      var g = d.gastos.find(function (x) { return String(x.id) === id; });
+      if (g) lote.gastos.push(g);
+    });
+
+    if (s.pendientes.config) {
+      lote.config = {
+        precioEmpanada: d.config.precioEmpanada,
+        ultimoBackup: d.config.ultimoBackup
+      };
+    }
+    return lote;
+  }
+
+  // Aplica lo que devolvió el servidor. Si un registro sigue en la cola local
+  // (se tocó mientras subíamos), manda lo local: se sube en la próxima vuelta.
+  function aplicarDelServidor(resp) {
+    var d = cargar();
+    var s = cargarSync();
+    var cambios = 0;
+
+    (resp.pedidos || []).forEach(function (p) {
+      if (s.pendientes.pedidos[String(p.id)]) return;
+      var i = d.pedidos.findIndex(function (x) { return String(x.id) === String(p.id); });
+      if (p.borrado) {
+        if (i >= 0) { d.pedidos.splice(i, 1); cambios++; }
+        return;
+      }
+      delete p.borrado;
+      if (i >= 0) d.pedidos[i] = p; else d.pedidos.push(p);
+      cambios++;
+    });
+
+    (resp.gastos || []).forEach(function (g) {
+      if (s.pendientes.gastos[String(g.id)]) return;
+      var i = d.gastos.findIndex(function (x) { return String(x.id) === String(g.id); });
+      if (g.borrado) {
+        if (i >= 0) { d.gastos.splice(i, 1); cambios++; }
+        return;
+      }
+      delete g.borrado;
+      if (i >= 0) d.gastos[i] = g; else d.gastos.push(g);
+      cambios++;
+    });
+
+    if (resp.config && !s.pendientes.config) {
+      if (resp.config.precioEmpanada != null) d.config.precioEmpanada = Number(resp.config.precioEmpanada) || PRECIO_DEFAULT;
+      if (resp.config.ultimoBackup !== undefined) d.config.ultimoBackup = resp.config.ultimoBackup;
+    }
+
+    d.pedidos.sort(function (a, b) { return String(a.fecha).localeCompare(String(b.fecha)); });
+    guardar();
+    return cambios;
+  }
+
+  /* Sincroniza en los dos sentidos.
+     Devuelve { ok, cambios, pendientes } o lanza si no hay red/sesión.
+     Nunca borra datos locales por un fallo de red: la cola espera. */
+  function sincronizar() {
+    if (!global.Api) return Promise.reject(new Error('Falta api.js'));
+    if (sincronizando) return sincronizando;
+
+    var s = cargarSync();
+    var lote = armarLote();
+    var subeAlgo = lote.pedidos.length || lote.gastos.length || Object.keys(lote.config).length;
+    var enviados = { pedidos: Object.keys(s.pendientes.pedidos), gastos: Object.keys(s.pendientes.gastos), config: s.pendientes.config };
+
+    var peticion = subeAlgo ? global.Api.subir(lote) : global.Api.bajar(s.cursor);
+
+    sincronizando = peticion
+      .then(function (resp) {
+        // Solo se limpia lo que efectivamente se envió: lo tocado mientras tanto queda
+        if (subeAlgo) {
+          enviados.pedidos.forEach(function (id) { delete s.pendientes.pedidos[id]; });
+          enviados.gastos.forEach(function (id) { delete s.pendientes.gastos[id]; });
+          if (enviados.config) s.pendientes.config = false;
+          guardarSync();
+        }
+        var cambios = aplicarDelServidor(resp);
+        s.cursor = Number(resp.ahora) || s.cursor;
+        guardarSync();
+        estadoConexion = 'ok';
+        if (cambios) avisarCambio();
+        return { ok: true, cambios: cambios, pendientes: cantidadPendientes() };
+      })
+      .catch(function (err) {
+        estadoConexion = err && err.red ? 'sin-red' : (err && err.noAutorizado ? 'sin-sesion' : 'error');
+        avisarCambio();
+        throw err;
+      })
+      .then(function (r) { sincronizando = null; return r; }, function (e) { sincronizando = null; throw e; });
+
+    return sincronizando;
   }
 
   global.Datos = {
@@ -416,6 +651,11 @@
     exportarJSON: exportarJSON,
     importarJSON: importarJSON,
     diasDesdeBackup: diasDesdeBackup,
-    borrarTodo: borrarTodo
+    borrarTodo: borrarTodo,
+    // --- sincronización ---
+    sincronizar: sincronizar,
+    estado: estado,
+    haySinSubir: haySinSubir,
+    alCambiar: alCambiar
   };
 })(window);

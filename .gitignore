@@ -6,3 +6,6 @@ node_modules/
 backups/
 *.mp4
 audio/
+.dev.vars
+.wrangler/
+worker-configuration.d.ts
