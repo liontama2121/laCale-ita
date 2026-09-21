@@ -613,7 +613,10 @@
         s.cursor = Number(resp.ahora) || s.cursor;
         guardarSync();
         estadoConexion = 'ok';
-        if (cambios) avisarCambio();
+        // Siempre se avisa, aunque no entren datos nuevos: vaciar la cola también
+        // es un cambio de estado y si no, el indicador queda mintiendo
+        // ("N sin subir" con la cola ya vacía).
+        avisarCambio();
         return { ok: true, cambios: cambios, pendientes: cantidadPendientes() };
       })
       .catch(function (err) {
