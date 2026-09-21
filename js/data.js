@@ -589,19 +589,67 @@
   /* Sincroniza en los dos sentidos.
      Devuelve { ok, cambios, pendientes } o lanza si no hay red/sesión.
      Nunca borra datos locales por un fallo de red: la cola espera. */
+  /* Primera sincronización de un equipo que YA tenía pedidos guardados de la
+     época en que todo vivía en el navegador. Esos registros nunca pasaron por
+     la cola, así que sin esto se quedarían encerrados en ese equipo para
+     siempre. Se suben SOLO los que el servidor no conoce: si un id ya existe
+     allá, manda el servidor, porque otro equipo pudo haberlo corregido y una
+     caché vieja no puede pisar esa corrección. */
+  function rescatarHuerfanos() {
+    var s = cargarSync();
+    if (s.migrado) return Promise.resolve();
+
+    var d = cargar();
+    if (!d.pedidos.length && !d.gastos.length) {
+      s.migrado = true;
+      guardarSync();
+      return Promise.resolve();
+    }
+
+    return global.Api.bajar(0).then(function (resp) {
+      var enServidor = { pedidos: {}, gastos: {} };
+      (resp.pedidos || []).forEach(function (p) { enServidor.pedidos[String(p.id)] = true; });
+      (resp.gastos || []).forEach(function (g) { enServidor.gastos[String(g.id)] = true; });
+
+      var rescatados = 0;
+      enLote(function () {
+        d.pedidos.forEach(function (p) {
+          if (!enServidor.pedidos[String(p.id)]) { marcar('pedidos', p.id, 'upsert'); rescatados++; }
+        });
+        d.gastos.forEach(function (g) {
+          if (!enServidor.gastos[String(g.id)]) { marcar('gastos', g.id, 'upsert'); rescatados++; }
+        });
+      });
+
+      s.migrado = true;
+      guardarSync();
+      if (rescatados) console.info('Sincronización: ' + rescatados + ' registro(s) locales que faltaban en el servidor');
+      return rescatados;
+    });
+  }
+
   function sincronizar() {
     if (!global.Api) return Promise.reject(new Error('Falta api.js'));
     if (sincronizando) return sincronizando;
 
     var s = cargarSync();
-    var lote = armarLote();
-    var subeAlgo = lote.pedidos.length || lote.gastos.length || Object.keys(lote.config).length;
-    var enviados = { pedidos: Object.keys(s.pendientes.pedidos), gastos: Object.keys(s.pendientes.gastos), config: s.pendientes.config };
+    var enviados;
 
-    var peticion = subeAlgo ? global.Api.subir(lote) : global.Api.bajar(s.cursor);
-
-    sincronizando = peticion
+    sincronizando = rescatarHuerfanos()
+      .then(function () {
+        // El lote se arma DESPUÉS del rescate, para que incluya lo recuperado
+        var lote = armarLote();
+        var subeAlgo = lote.pedidos.length || lote.gastos.length || Object.keys(lote.config).length;
+        enviados = {
+          pedidos: Object.keys(s.pendientes.pedidos),
+          gastos: Object.keys(s.pendientes.gastos),
+          config: s.pendientes.config,
+          subeAlgo: subeAlgo
+        };
+        return subeAlgo ? global.Api.subir(lote) : global.Api.bajar(s.cursor);
+      })
       .then(function (resp) {
+        var subeAlgo = enviados.subeAlgo;
         // Solo se limpia lo que efectivamente se envió: lo tocado mientras tanto queda
         if (subeAlgo) {
           enviados.pedidos.forEach(function (id) { delete s.pendientes.pedidos[id]; });
