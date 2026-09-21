@@ -71,11 +71,17 @@ export async function verificarToken(token, secreto) {
   }
 }
 
+// La "ñ" se puede escribir de dos formas distintas en Unicode: un solo carácter
+// (U+00F1) o "n" + tilde combinada (U+006E U+0303). Se ven idénticas pero no son
+// iguales byte a byte: sin normalizar, la misma clave falla según el teclado
+// (iPhone y Mac suelen mandar la forma descompuesta).
+function normal(s) {
+  return String(s == null ? '' : s).normalize('NFC');
+}
+
 // Compara credenciales sin filtrar tiempos
 export function credencialesOk(usuario, clave_, env) {
-  const u = String(usuario || '');
-  const c = String(clave_ || '');
-  const uOk = igualesSeguro(u, String(env.PANEL_USUARIO || ''));
-  const cOk = igualesSeguro(c, String(env.PANEL_CLAVE || ''));
+  const uOk = igualesSeguro(normal(usuario), normal(env.PANEL_USUARIO));
+  const cOk = igualesSeguro(normal(clave_), normal(env.PANEL_CLAVE));
   return uOk && cOk;
 }
