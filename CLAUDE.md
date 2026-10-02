@@ -94,7 +94,7 @@ Definida en `css/shared.css` como CSS vars.
 
 Sabores: Papa Carne, Papa Pollo, Ranchera, Queso, Mexicana.
 Lista de sabores en `Datos.SABORES` (`js/data.js`) — única fuente de verdad para el panel.
-La landing tiene el menú hardcodeado en `index.html` (y `js/landing.js` arma el mensaje de WhatsApp con los sabores escogidos).
+La landing tiene el menú hardcodeado en `index.html` (y `js/landing.js` arma el mensaje de WhatsApp: sueltas + combos. El armador de combos exige exactamente 4 o 6 sabores, igual que el panel; precios de combo en `COMBOS` de `landing.js`).
 
 ## Clientes
 No hay tabla de clientes: se derivan de `pedidos` con `Datos.clientes()` / `Datos.buscarCliente(nombre)` (`js/data.js`).

@@ -100,7 +100,7 @@
     <section class="sabores-sec" id="menu" aria-labelledby="saboresTitulo">
       <div class="marco">
         <h2 class="sec-titulo" id="saboresTitulo">Escoge de la paila</h2>
-        <p class="sec-ayuda">Toca <strong>+</strong> y la empanada salta a tu canasta. Te armamos el mensaje para Lina.</p>
+        <p class="sec-ayuda">Toca <strong>+</strong> y la empanada salta a tu canasta. ¿Combo? Ármalo abajo con tus sabores.</p>
 
         <ul class="sabores" id="sabores">
           <li class="sabor" data-sabor="Papa Carne">
@@ -157,6 +157,7 @@
           </div>
           <div class="canasta-texto">
             <p class="pedido-resumen" id="pedidoResumen" aria-live="polite">Tu canasta está vacía. Mezcla los sabores como quieras.</p>
+            <ul class="canasta-combos" id="canastaCombos"></ul>
             <p class="pedido-pista" id="pedidoPista" hidden></p>
           </div>
           <a href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20pedir%20empanadas"
@@ -173,24 +174,37 @@
       <div class="marco">
         <h2 class="sec-titulo" id="combosTitulo">Combos para compartir</h2>
         <div class="combos">
-          <a class="combo" aria-label="Pedir combo x4 por WhatsApp" href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20un%20combo%20x4%20de%20empanadas.%20Los%20sabores%20son:" target="_blank" rel="noopener">
-            <div class="abanico abanico-4" aria-hidden="true">
+          <button type="button" class="combo" data-combo="4" aria-expanded="false" aria-controls="armador">
+            <span class="abanico abanico-4" aria-hidden="true">
               <span data-empanada></span><span data-empanada></span><span data-empanada></span><span data-empanada></span>
-            </div>
-            <p class="combo-n">Combo x4</p>
-            <p class="combo-precio">$11.000</p>
-            <p class="combo-detalle">Cuatro sabores a tu gusto. Ahorras $1.000.</p>
-            <p class="combo-pedir">Pedir combo x4 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg></p>
-          </a>
-          <a class="combo combo-grande" aria-label="Pedir combo x6 por WhatsApp" href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20un%20combo%20x6%20de%20empanadas.%20Los%20sabores%20son:" target="_blank" rel="noopener">
-            <div class="abanico abanico-6" aria-hidden="true">
+            </span>
+            <span class="combo-n">Combo x4</span>
+            <span class="combo-precio">$11.000</span>
+            <span class="combo-detalle">Cuatro sabores a tu gusto. Ahorras $1.000.</span>
+            <span class="combo-pedir">Armar combo x4 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg></span>
+          </button>
+          <button type="button" class="combo combo-grande" data-combo="6" aria-expanded="false" aria-controls="armador">
+            <span class="abanico abanico-6" aria-hidden="true">
               <span data-empanada></span><span data-empanada></span><span data-empanada></span><span data-empanada></span><span data-empanada></span><span data-empanada></span>
-            </div>
-            <p class="combo-n">Combo x6</p>
-            <p class="combo-precio">$17.000</p>
-            <p class="combo-detalle">Seis sabores a tu gusto. Ahorras $1.000.</p>
-            <p class="combo-pedir">Pedir combo x6 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg></p>
-          </a>
+            </span>
+            <span class="combo-n">Combo x6</span>
+            <span class="combo-precio">$17.000</span>
+            <span class="combo-detalle">Seis sabores a tu gusto. Ahorras $1.000.</span>
+            <span class="combo-pedir">Armar combo x6 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg></span>
+          </button>
+        </div>
+
+        <div class="armador" id="armador" role="region" aria-labelledby="armadorTitulo" hidden>
+          <div class="armador-cabeza">
+            <h3 class="armador-titulo" id="armadorTitulo">Arma tu combo</h3>
+            <p class="armador-cuenta" id="armadorCuenta" aria-live="polite"></p>
+            <button type="button" class="armador-cerrar" id="armadorCerrar" aria-label="Cerrar el armador de combo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-cerrar"/></svg>
+            </button>
+          </div>
+          <div class="armador-puestos" id="armadorPuestos" aria-hidden="true"></div>
+          <ul class="armador-sabores" id="armadorSabores"></ul>
+          <button type="button" class="btn-armar" id="armadorAgregar" disabled>Agregar combo a la canasta</button>
         </div>
       </div>
     </section>
@@ -260,6 +274,9 @@
     </symbol>
     <symbol id="icono-flecha" viewBox="0 0 24 24">
       <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icono-cerrar" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
     </symbol>
     <symbol id="icono-canasta" viewBox="0 0 64 48">
       <path d="M6 18h52l-6 24a4 4 0 0 1-4 3H16a4 4 0 0 1-4-3z" fill="currentColor"/>

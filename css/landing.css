@@ -400,6 +400,10 @@
   overflow: hidden;
   transition: transform 0.35s var(--ease-salida), border-color 0.3s;
 }
+.combo { width: 100%; text-align: left; font: inherit; cursor: pointer; }
+.combo > span { display: block; }
+.combo > .combo-pedir { display: inline-flex; }
+.combo[aria-expanded="true"] { border-color: var(--dorado); box-shadow: 0 0 0 1px var(--dorado), 0 24px 60px -30px rgba(255, 201, 61, 0.5); }
 .combo-grande { background: linear-gradient(160deg, #3A230C, var(--noche-2) 70%); border-color: rgba(255, 201, 61, 0.4); }
 .combo p { margin: 0; }
 .abanico { position: relative; width: 100%; height: 190px; margin-bottom: 12px; }
@@ -451,6 +455,133 @@
   font-weight: 800;
 }
 .combo-pedir svg { width: 20px; height: 20px; transition: transform 0.25s var(--ease-salida); }
+
+/* ---------- Armador de combos ---------- */
+.armador {
+  margin-top: 16px;
+  padding: 22px 18px 24px;
+  border-radius: var(--r-sup);
+  background: var(--noche-2);
+  border: 1px solid rgba(255, 201, 61, 0.45);
+  display: grid;
+  gap: 20px;
+}
+.armador.abriendo { animation: aparecer 0.5s var(--ease-salida); }
+@media (min-width: 768px) { .armador { padding: 28px 32px 32px; } }
+.armador-cabeza { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+.armador-titulo { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(1.6rem, 4.6vw, 2.3rem); line-height: 1.15; padding-bottom: 2px; }
+.armador-cuenta {
+  margin: 0;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--noche-3);
+  border: 1px solid var(--borde-suave);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.armador-cuenta.completo { background: var(--dorado); color: var(--noche); border-color: var(--dorado); }
+.armador-cerrar {
+  margin-left: auto;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--crema);
+  background: var(--noche-3);
+  border: 1px solid var(--borde-suave);
+}
+.armador-cerrar svg { width: 22px; height: 22px; }
+
+/* Los puestos del combo: cada empanada escogida cae en su puesto y se dora */
+.armador-puestos { display: grid; grid-template-columns: repeat(var(--puestos, 4), minmax(0, 1fr)); gap: 8px; max-width: 640px; }
+.puesto {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.puesto-hueco {
+  width: 100%;
+  aspect-ratio: 200 / 120;
+  border-radius: 999px 999px 18px 18px;
+  border: 2px dashed rgba(255, 201, 61, 0.35);
+  display: grid;
+  place-items: center;
+}
+.puesto .empanada { width: 100%; }
+.puesto-nombre { font-size: 0.78rem; font-weight: 600; color: var(--crema-suave); text-align: center; line-height: 1.15; min-height: 2.3em; overflow-wrap: anywhere; }
+.puesto.lleno .puesto-hueco { border-color: transparent; }
+@media (prefers-reduced-motion: no-preference) {
+  .puesto.nuevo .empanada { animation: caer-puesto 0.55s var(--ease-rebote), freir-rapido 1.2s var(--ease-salida); }
+  .armador-puestos.completo .puesto { animation: menear 0.5s var(--ease-rebote); }
+  .armador-puestos.completo .puesto:nth-child(2) { animation-delay: 0.05s; }
+  .armador-puestos.completo .puesto:nth-child(3) { animation-delay: 0.1s; }
+  .armador-puestos.completo .puesto:nth-child(4) { animation-delay: 0.15s; }
+  .armador-puestos.completo .puesto:nth-child(5) { animation-delay: 0.2s; }
+  .armador-puestos.completo .puesto:nth-child(6) { animation-delay: 0.25s; }
+}
+@keyframes caer-puesto {
+  from { transform: translateY(-40px) rotate(-20deg) scale(0.6); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes freir-rapido {
+  from { --d: 0; }
+  to   { --d: 1; }
+}
+
+.armador-sabores { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 700px) { .armador-sabores { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
+.armador-sabor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 999px;
+  background: var(--noche-3);
+  border: 1px solid var(--borde-suave);
+}
+.armador-sabor.escogido { border-color: rgba(255, 201, 61, 0.55); }
+.armador-sabor-nombre { font-weight: 800; font-size: 1.05rem; }
+.btn-armar {
+  justify-self: start;
+  min-height: 56px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  background: var(--dorado);
+  color: var(--noche);
+  font-weight: 800;
+  font-size: 1.08rem;
+  transition: transform 0.25s var(--ease-rebote), opacity 0.2s;
+}
+.btn-armar:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); }
+.btn-armar:active:not(:disabled) { transform: scale(0.97); }
+.btn-armar:disabled { opacity: 0.4; cursor: not-allowed; }
+@media (max-width: 480px) { .btn-armar { justify-self: stretch; } }
+
+/* Combos dentro de la canasta */
+.canasta-combos { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.canasta-combos:empty { display: none; }
+.canasta-combo { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: 0.95rem; line-height: 1.3; color: var(--crema-suave); }
+.canasta-combo strong { color: var(--dorado); }
+.canasta-combo.recien { animation: resaltar 1.4s var(--ease-salida); border-radius: 8px; }
+.canasta-quitar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  margin: -8px 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--crema-suave);
+}
+.canasta-quitar svg { width: 16px; height: 16px; }
+.canasta-quitar:hover { color: var(--aji); background: var(--noche-3); }
+@keyframes resaltar {
+  0%   { background: rgba(255, 201, 61, 0.35); }
+  100% { background: transparent; }
+}
 
 /* ---------- Así de fácil ---------- */
 .ruta { padding: 104px 0; }
