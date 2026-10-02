@@ -1,0 +1,2 @@
+empanadas.jpg  Foto real de La Caleñita (copia de empanada.jpeg).
+Las empanadas animadas de la landing son ilustraciones SVG hechas a mano en index.html (#plantillaEmpanada).

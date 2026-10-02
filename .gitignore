@@ -10,3 +10,7 @@ audio/
 .wrangler/
 worker-configuration.d.ts
 .cloudflare-token
+
+# Capturas de revisión de diseño
+.impeccable/review/
+.impeccable/questions/

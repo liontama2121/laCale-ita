@@ -45,6 +45,7 @@ js/data.js        Caché local + cola offline + sincronización con D1 (window.D
 js/panel.js       Lógica del panel
 js/landing.js     Nav + fallback de logo
 images/logo.png   Placeholder generado; reemplazar por el logo real
+images/empanadas.jpg  Foto real de Lina (copia de empanada.jpeg)
 
 functions/api/_middleware.js   Verifica el token en todo /api/* (menos /api/login)
 functions/api/login.js         POST usuario+clave → token firmado
@@ -93,7 +94,7 @@ Definida en `css/shared.css` como CSS vars.
 
 Sabores: Papa Carne, Papa Pollo, Ranchera, Queso, Mexicana.
 Lista de sabores en `Datos.SABORES` (`js/data.js`) — única fuente de verdad para el panel.
-La landing tiene el menú hardcodeado en `index.html`.
+La landing tiene el menú hardcodeado en `index.html` (y `js/landing.js` arma el mensaje de WhatsApp con los sabores escogidos).
 
 ## Clientes
 No hay tabla de clientes: se derivan de `pedidos` con `Datos.clientes()` / `Datos.buscarCliente(nombre)` (`js/data.js`).
@@ -120,10 +121,14 @@ Cada pedido recibe `numeroRifa` de 4 dígitos único al crearse. "Reiniciar rifa
 en todos los pedidos; los pedidos nuevos vuelven a recibir número.
 
 ## Reglas de estilo
-- Fredoka para títulos, Nunito para cuerpo
-- Mobile-first, botones grandes tipo pill (min 48px)
+- **Landing** (`index.html`, `css/landing.css`): "La freidora de noche". Fondo oscuro cálido, aceite dorado,
+  empanadas SVG que se doran en vivo (plantilla `#plantillaEmpanada`, grado de fritura con `@property --d`).
+  Shrikhand para titulares, Bricolage Grotesque para texto. Verde solo para pedir por WhatsApp.
+  Botones pill, superficies a 24px. Animaciones respetan `prefers-reduced-motion`.
+  Variables bajo `.landing` en `landing.css` (no tocan el panel). Diseño en `DESIGN.md`, producto en `PRODUCT.md`.
+- **Panel/login**: Fredoka para títulos, Nunito para cuerpo, botones pill (`css/shared.css`).
+- Mobile-first, botones mínimo 48px
 - Inputs a 16px para evitar zoom en iOS
-- Confetti festivo caleño, sin excederse (confeti manual con divs, sin librerías)
 - Todo en español de Colombia
 - Nunca inyectar texto de usuario sin `UI.escapar()`
 - Footer: "Hecho con amor por JuanCode 💛"

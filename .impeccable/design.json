@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-02T23:30:00.000Z",
+  "title": "Design System: La Caleñita",
+  "extensions": {
+    "scope": "Solo la landing pública (index.html, css/landing.css, js/landing.js). Tokens bajo .landing en css/landing.css. El panel, el login y css/shared.css quedan fuera de este sistema.",
+    "colorMeta": {
+      "noche": { "role": "neutral", "displayName": "Noche", "canonical": "#120C07", "tonalRamp": ["#0A0603", "#120C07", "#1C130B", "#2A1C10", "#3D2A19", "#5A4330", "#8A7560", "#C9BBAA"] },
+      "noche-2": { "role": "neutral", "displayName": "Noche Brasa", "canonical": "#1C130B", "tonalRamp": ["#0A0603", "#120C07", "#1C130B", "#2A1C10", "#3D2A19", "#5A4330", "#8A7560", "#C9BBAA"] },
+      "noche-3": { "role": "neutral", "displayName": "Noche Carbón", "canonical": "#2A1C10", "tonalRamp": ["#0A0603", "#120C07", "#1C130B", "#2A1C10", "#3D2A19", "#5A4330", "#8A7560", "#C9BBAA"] },
+      "borde-suave": { "role": "neutral", "displayName": "Hilo Dorado", "canonical": "rgba(255, 201, 61, 0.16)" },
+      "crema": { "role": "neutral", "displayName": "Crema de Masa", "canonical": "#F8EBD2", "tonalRamp": ["#3A3022", "#5C4E3A", "#857358", "#AD9A7C", "#CDBBA0", "#E3D3B8", "#F8EBD2", "#FFF8EC"] },
+      "crema-suave": { "role": "neutral", "displayName": "Crema Tostada", "canonical": "#CDBBA0", "tonalRamp": ["#3A3022", "#5C4E3A", "#857358", "#AD9A7C", "#CDBBA0", "#E3D3B8", "#F8EBD2", "#FFF8EC"] },
+      "dorado": { "role": "primary", "displayName": "Dorado de Aceite", "canonical": "#FFC93D", "tonalRamp": ["#3D2600", "#6E3A08", "#A35A0C", "#E08A14", "#F5A623", "#FFC93D", "#FFDD85", "#FFF1CC"] },
+      "maiz": { "role": "primary", "displayName": "Maíz Tostado", "canonical": "#F5A623", "tonalRamp": ["#3D2600", "#6E3A08", "#A35A0C", "#E08A14", "#F5A623", "#FFC93D", "#FFDD85", "#FFF1CC"] },
+      "aji": { "role": "tertiary", "displayName": "Ají", "canonical": "#F0533A", "tonalRamp": ["#3A0D06", "#66180C", "#962414", "#C73622", "#F0533A", "#F57E69", "#F9AD9F", "#FDDCD5"] },
+      "verde": { "role": "secondary", "displayName": "Verde Pedido", "canonical": "#25D366", "tonalRamp": ["#08240F", "#0E4520", "#146A31", "#1B9447", "#25D366", "#5EE08D", "#9BEDB8", "#D6F8E2"] },
+      "tinta-verde": { "role": "secondary", "displayName": "Tinta de Hoja", "canonical": "#08240F", "tonalRamp": ["#08240F", "#0E4520", "#146A31", "#1B9447", "#25D366", "#5EE08D", "#9BEDB8", "#D6F8E2"] },
+      "masa-cruda": { "role": "illustration", "displayName": "Masa Cruda", "canonical": "#F4E1A6" },
+      "masa-dorada": { "role": "illustration", "displayName": "Masa Dorada", "canonical": "#EE9A22" },
+      "grumo": { "role": "illustration", "displayName": "Grumo de Fritura", "canonical": "#B9560C" },
+      "repulgue": { "role": "illustration", "displayName": "Repulgue", "canonical": "#E8B04E" },
+      "aceite-fondo": { "role": "illustration", "displayName": "Aceite Hondo", "canonical": "#6E3A08" },
+      "aceite-medio": { "role": "illustration", "displayName": "Aceite Medio", "canonical": "#E08A14" },
+      "metal-alto": { "role": "illustration", "displayName": "Metal de Paila", "canonical": "#4A3B30" },
+      "metal-bajo": { "role": "illustration", "displayName": "Metal en Sombra", "canonical": "#16100B" },
+      "combo-brasa": { "role": "neutral", "displayName": "Brasa de Combo", "canonical": "#3A230C" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Solo el titular del hero, en Shrikhand con halo dorado. Desde 900px: clamp(3rem, 5.4vw, 5.2rem)." },
+      "headline": { "displayName": "Headline", "purpose": "Títulos de sección y de la foto." },
+      "price": { "displayName": "Precio", "purpose": "Precios de combo en dorado; el chip del hero usa Shrikhand a 2rem." },
+      "title": { "displayName": "Title", "purpose": "Nombre de cada sabor; el nombre del combo sube a clamp(1.8rem, 4.4vw, 2.5rem)." },
+      "body": { "displayName": "Body", "purpose": "Subtítulos y ayudas en Bricolage Grotesque, 36 a 52 caracteres de ancho." },
+      "label": { "displayName": "Label", "purpose": "Botones, resumen de canasta y cantidades (cifras tabulares)." }
+    },
+    "shadows": [
+      { "name": "halo-pedir", "value": "0 10px 30px -10px rgba(37, 211, 102, 0.55)", "purpose": "Botones verdes de pedir en reposo." },
+      { "name": "halo-pedir-hover", "value": "0 16px 36px -10px rgba(37, 211, 102, 0.7)", "purpose": "Botones verdes con el puntero encima." },
+      { "name": "halo-flotante", "value": "0 12px 30px -8px rgba(37, 211, 102, 0.6)", "purpose": "Botón flotante de WhatsApp." },
+      { "name": "resplandor-foto", "value": "0 30px 70px -30px rgba(245, 166, 35, 0.45)", "purpose": "Luz dorada debajo de la foto real." },
+      { "name": "sombra-canasta", "value": "0 20px 50px -20px rgba(0, 0, 0, 0.8)", "purpose": "Canasta pegajosa sobre el contenido, con backdrop-filter blur(12px)." },
+      { "name": "sombra-empanada", "value": "drop-shadow(0 6px 10px rgba(80, 30, 0, 0.45))", "purpose": "Empanadas en la paila (filter, sigue la silueta)." },
+      { "name": "sombra-abanico", "value": "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.45))", "purpose": "Empanadas del abanico de combos." },
+      { "name": "halo-titular", "value": "0 0 42px rgba(255, 170, 40, 0.28)", "purpose": "text-shadow del titular del hero." }
+    ],
+    "motion": [
+      { "name": "ease-salida", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entradas, revelados, dorado de filas, sombras." },
+      { "name": "ease-rebote", "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "purpose": "Botones, controles, abanico, rebote de canasta." },
+      { "name": "freir", "value": "9s ease-salida infinite, desfase -3s y -6s", "purpose": "Ciclo de la paila: se hunde cruda, se dora, salta y vuelve a entrar." },
+      { "name": "dorar-fila", "value": "--d 1.4s ease-salida, 0.12s entre filas", "purpose": "Cada sabor se dora al entrar en pantalla." },
+      { "name": "vuelo-canasta", "value": "650ms cubic-bezier(0.45, 0, 0.2, 1)", "purpose": "Empanada que vuela en arco hasta la canasta (Web Animations)." },
+      { "name": "abanico", "value": "0.8s ease-rebote, 50ms entre empanadas", "purpose": "Apertura de los combos al entrar en pantalla." },
+      { "name": "revelar", "value": "0.8s ease-salida, translateY(28px)", "purpose": "Títulos, ayudas, foto (escala 1.06), combos y pasos." },
+      { "name": "burbuja", "value": "1.6s a 2.4s ease-in infinite", "purpose": "Burbujas del aceite." },
+      { "name": "vapor", "value": "6s a 7s ease-out infinite", "purpose": "Vapor de la paila y de la foto." },
+      { "name": "latir", "value": "3.2s ease-in-out infinite", "purpose": "Resplandor de la paila." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce", "purpose": "Todo queda quieto y dorado; revelados visibles; abanico sin transición." }
+    ],
+    "breakpoints": [
+      { "name": "minimo", "value": "400px", "purpose": "Por debajo, dibujo del sabor a 52px." },
+      { "name": "nav-compacta", "value": "480px", "purpose": "Por debajo, la nav solo muestra marca y Pedir." },
+      { "name": "md", "value": "768px", "purpose": "Margen 32px, combos a dos columnas, canasta en una línea." },
+      { "name": "lg", "value": "900px", "purpose": "Hero en dos columnas, foto al lado, sabores a dos columnas, pasos a tres." }
+    ],
+    "properties": [
+      { "name": "--d", "value": "@property <number>, inherits, initial 1", "purpose": "Grado de fritura de la empanada SVG: 0 cruda, 1 dorada. Controla opacidad de la masa dorada, grumos y brillo del repulgue." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón Pedir por WhatsApp",
+      "kind": "button",
+      "refersTo": "button-pedir-grande",
+      "description": "Único destino de la página. Verde, pill, ícono de WhatsApp, rebote al pasar el puntero.",
+      "html": "<a class=\"ds-btn-pedir\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.9 11.9 0 0 0 5.69 1.45c6.55 0 11.89-5.34 11.89-11.9A11.8 11.8 0 0 0 12.05 0zm0 21.79a9.9 9.9 0 0 1-5.03-1.38l-.36-.22-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88a9.88 9.88 0 0 1 9.88 9.89c0 5.45-4.44 9.89-9.89 9.89z\"/></svg>Pedir por WhatsApp</a>",
+      "css": ".ds-btn-pedir { display: inline-flex; align-items: center; gap: 10px; min-height: 58px; padding: 14px 28px; border-radius: 999px; background: #25D366; color: #08240F; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 1.12rem; text-decoration: none; white-space: nowrap; box-shadow: 0 10px 30px -10px rgba(37, 211, 102, 0.55); transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-pedir:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 16px 36px -10px rgba(37, 211, 102, 0.7); } .ds-btn-pedir:active { transform: translateY(1px) scale(0.98); } .ds-btn-pedir:focus-visible { outline: 3px solid #FFC93D; outline-offset: 3px; }"
+    },
+    {
+      "name": "Chip de precio",
+      "kind": "chip",
+      "refersTo": "chip-precio",
+      "description": "Precio suelto del hero: pill dorado con Shrikhand.",
+      "html": "<p class=\"ds-precio\"><strong>$3.000</strong> <span>c/u</span></p>",
+      "css": ".ds-precio { margin: 0; display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 18px 8px; border-radius: 999px; background: #FFC93D; color: #120C07; line-height: 1.1; } .ds-precio strong { font-family: 'Shrikhand', serif; font-weight: 400; font-size: 2rem; } .ds-precio span { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; }"
+    },
+    {
+      "name": "Fila de sabor",
+      "kind": "card",
+      "refersTo": "card-sabor",
+      "description": "Superficie de 24px con nombre en Shrikhand y controles pill de 48px; pasa a carbón con borde dorado al escoger.",
+      "html": "<div class=\"ds-sabor\"><span class=\"ds-sabor-nombre\">Papa Carne</span><span class=\"ds-sabor-control\"><button class=\"ds-sabor-btn\" aria-label=\"Quitar\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M5 12h14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\" stroke-linecap=\"round\"/></svg></button><output class=\"ds-sabor-cant\">2</output><button class=\"ds-sabor-btn ds-sabor-mas\" aria-label=\"Agregar\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M12 5v14M5 12h14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\" stroke-linecap=\"round\"/></svg></button></span></div>",
+      "css": ".ds-sabor { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 24px; background: #2A1C10; border: 1px solid rgba(255, 201, 61, 0.5); color: #F8EBD2; transition: background-color 0.3s, border-color 0.3s; } .ds-sabor-nombre { font-family: 'Shrikhand', serif; font-size: 1.6rem; line-height: 1.15; padding-bottom: 2px; } .ds-sabor-control { display: flex; align-items: center; gap: 6px; } .ds-sabor-btn { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 999px; color: #F8EBD2; background: #2A1C10; border: 1px solid rgba(255, 201, 61, 0.16); cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); } .ds-sabor-btn:hover { transform: scale(1.08); } .ds-sabor-btn:active { transform: scale(0.92); } .ds-sabor-btn:focus-visible { outline: 3px solid #FFC93D; outline-offset: 3px; } .ds-sabor-mas { background: #FFC93D; color: #120C07; border-color: #FFC93D; } .ds-sabor-cant { min-width: 2ch; text-align: center; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 1.25rem; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Canasta",
+      "kind": "custom",
+      "refersTo": "canasta",
+      "description": "Barra pegajosa con el ícono de canasta, contador ají y el botón de pedir con el mensaje armado.",
+      "html": "<div class=\"ds-canasta\"><span class=\"ds-canasta-icono\"><svg viewBox=\"0 0 64 48\" width=\"56\" height=\"42\"><path d=\"M6 18h52l-6 24a4 4 0 0 1-4 3H16a4 4 0 0 1-4-3z\" fill=\"currentColor\"/><path d=\"M18 18 28 4M46 18 36 4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg><span class=\"ds-canasta-n\">3</span></span><p class=\"ds-canasta-texto\"><strong>3 empanadas</strong> sueltas: $9.000</p></div>",
+      "css": ".ds-canasta { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 24px; background: rgba(42, 28, 16, 0.94); backdrop-filter: blur(12px); border: 1px solid rgba(255, 201, 61, 0.35); box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8); color: #F8EBD2; } .ds-canasta-icono { position: relative; color: #FFC93D; display: block; } .ds-canasta-n { position: absolute; top: -8px; right: -8px; min-width: 26px; height: 26px; padding: 0 6px; display: grid; place-items: center; border-radius: 999px; background: #F0533A; color: #fff; font-weight: 800; font-size: 0.9rem; } .ds-canasta-texto { margin: 0; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 1.05rem; } .ds-canasta-texto strong { color: #FFC93D; }"
+    },
+    {
+      "name": "Tarjeta de combo",
+      "kind": "card",
+      "refersTo": "card-combo",
+      "description": "Enlace de 24px con nombre y precio en Shrikhand, detalle en crema tostada y botón fantasma dorado.",
+      "html": "<a class=\"ds-combo\" href=\"#\"><span class=\"ds-combo-n\">Combo x6</span><span class=\"ds-combo-precio\">$17.000</span><span class=\"ds-combo-detalle\">Seis sabores a tu gusto. Ahorras $1.000.</span><span class=\"ds-combo-pedir\">Pedir combo x6 <svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\"><path d=\"M4 12h15M13 6l6 6-6 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span></a>",
+      "css": ".ds-combo { display: grid; justify-items: start; gap: 6px; padding: 28px 24px 30px; border-radius: 24px; background: linear-gradient(160deg, #3A230C, #1C130B 70%); border: 1px solid rgba(255, 201, 61, 0.4); color: #F8EBD2; text-decoration: none; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s; } .ds-combo:hover { transform: translateY(-4px); border-color: #FFC93D; } .ds-combo:focus-visible { outline: 3px solid #FFC93D; outline-offset: 3px; } .ds-combo-n { font-family: 'Shrikhand', serif; font-size: 2.2rem; line-height: 1.15; } .ds-combo-precio { font-family: 'Shrikhand', serif; font-size: 3.2rem; line-height: 1.1; color: #FFC93D; } .ds-combo-detalle { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 1.05rem; color: #CDBBA0; } .ds-combo-pedir { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 10px 20px; border-radius: 999px; border: 1.5px solid #FFC93D; color: #FFC93D; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; } .ds-combo-pedir svg { transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-combo:hover .ds-combo-pedir svg { transform: translateX(4px); }"
+    },
+    {
+      "name": "Navegación",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Barra pegajosa nocturna con marca en Shrikhand dorado, enlaces con subrayado dorado y botón Pedir chico.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-marca\" href=\"#\">La Caleñita</a><nav class=\"ds-nav-links\"><a href=\"#\">Sabores</a><a href=\"#\">Combos</a><a class=\"ds-nav-pedir\" href=\"#\">Pedir</a></nav></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 0 16px; background: rgba(18, 12, 7, 0.86); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 201, 61, 0.16); } .ds-nav-marca { font-family: 'Shrikhand', serif; font-size: 1.45rem; color: #FFC93D; text-decoration: none; line-height: 1.2; } .ds-nav-links { display: flex; align-items: center; gap: 22px; font-family: 'Bricolage Grotesque', system-ui, sans-serif; } .ds-nav-links a:not(.ds-nav-pedir) { color: #F8EBD2; font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; text-decoration-color: transparent; transition: text-decoration-color 0.2s; } .ds-nav-links a:not(.ds-nav-pedir):hover { text-decoration-color: #FFC93D; } .ds-nav-links a:focus-visible { outline: 3px solid #FFC93D; outline-offset: 3px; border-radius: 6px; } .ds-nav-pedir { display: inline-flex; align-items: center; min-height: 48px; padding: 10px 22px; border-radius: 999px; background: #25D366; color: #08240F; font-weight: 800; text-decoration: none; box-shadow: 0 10px 30px -10px rgba(37, 211, 102, 0.55); }"
+    },
+    {
+      "name": "Empanada que se fríe",
+      "kind": "custom",
+      "refersTo": "empanada",
+      "description": "La empanada SVG firma; --d anima de cruda (0) a dorada (1).",
+      "html": "<svg class=\"ds-empanada\" viewBox=\"0 0 200 120\" width=\"160\"><path class=\"ds-cruda\" d=\"M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z\"/><path class=\"ds-dorada\" d=\"M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z\"/><path d=\"M44 52 C 60 30, 90 22, 118 24\" fill=\"none\" stroke=\"rgba(255,246,214,0.55)\" stroke-width=\"7\" stroke-linecap=\"round\"/><g class=\"ds-grumos\"><circle cx=\"70\" cy=\"48\" r=\"3\"/><circle cx=\"104\" cy=\"40\" r=\"2.5\"/><circle cx=\"132\" cy=\"56\" r=\"3\"/><circle cx=\"86\" cy=\"70\" r=\"2.5\"/></g><g fill=\"#E8B04E\"><circle cx=\"22\" cy=\"97\" r=\"7\"/><circle cx=\"40\" cy=\"100\" r=\"7\"/><circle cx=\"58\" cy=\"102\" r=\"7\"/><circle cx=\"76\" cy=\"103\" r=\"7\"/><circle cx=\"94\" cy=\"104\" r=\"7\"/><circle cx=\"112\" cy=\"104\" r=\"7\"/><circle cx=\"130\" cy=\"103\" r=\"7\"/><circle cx=\"148\" cy=\"102\" r=\"7\"/><circle cx=\"166\" cy=\"100\" r=\"7\"/><circle cx=\"180\" cy=\"97\" r=\"6\"/></g></svg>",
+      "css": "@property --d { syntax: '<number>'; inherits: true; initial-value: 1; } .ds-empanada { --d: 0; overflow: visible; transition: --d 1.4s cubic-bezier(0.16, 1, 0.3, 1); filter: drop-shadow(0 6px 10px rgba(80, 30, 0, 0.45)); } .ds-empanada:hover { --d: 1; } .ds-cruda { fill: #F4E1A6; } .ds-dorada { fill: #EE9A22; opacity: var(--d); } .ds-grumos circle { fill: #B9560C; } .ds-grumos { opacity: calc(var(--d) * 0.75); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La freidora de noche",
+    "overview": "La landing es la cocina de Lina a oscuras, a la hora del antojo: un fondo marrón casi negro, una sola fuente de luz que es el aceite dorado de la paila, y empanadas que se fríen en vivo. Todo el calor visual sale del aceite: resplandores ámbar, burbujas que suben, vapor que se escapa por encima. La empanada ilustrada es el personaje del sistema y aparece en todas partes, siempre la misma silueta en SVG, pasando de cruda (pálida) a dorada según el momento.\n\nLa densidad es generosa y vertical, pensada para el celular: una cosa por pantalla, títulos gordos y redondos en Shrikhand, texto de apoyo corto en Bricolage Grotesque. El tono es de vecina caleña, festivo pero sin ruido. La única foto real (el plato de Lina) entra como prueba de que lo dibujado existe, con su propio vapor encima.\n\nEl sistema reemplaza por completo el mundo anterior de cartel tipográfico de La Linterna, que se rechazó porque no abría el apetito. No quedan tintas fluorescentes, esquinas rectas ni letras de madera.",
+    "keyCharacteristics": [
+      "Fondo nocturno cálido en tres escalones (`noche`, `noche-2`, `noche-3`), nunca negro puro ni gris frío.",
+      "La luz es dorada y viene del aceite; los bordes son hilos dorados translúcidos.",
+      "La empanada SVG es el motivo único: se dora con la propiedad registrada `--d` (0 cruda, 1 dorada).",
+      "Verde WhatsApp solo en lo que abre el chat.",
+      "Todo lo que se toca es pill; las superficies a 24px; la foto a 28px.",
+      "Movimiento de cocina (freír, burbujear, humear, saltar a la canasta), siempre apagado con `prefers-reduced-motion`."
+    ],
+    "rules": [
+      { "name": "The Verde Solo Pide Rule", "body": "El verde existe únicamente en lo que abre WhatsApp. Ningún otro elemento, decoración ni estado usa verde.", "section": "colors" },
+      { "name": "The Luz de Paila Rule", "body": "Toda luz del sistema es cálida y sale del aceite: halos radiales ámbar, sombras teñidas de dorado o de verde en el caso del botón de pedir. No hay luces frías ni blancos puros fuera del vapor y del texto del contador.", "section": "colors" },
+      { "name": "The Shrikhand Respira Rule", "body": "Toda línea en Shrikhand lleva `padding-bottom` (0.08em o 2px) e interlineado de 1.08 o más, porque la fuente cuelga por debajo y se corta si se aprieta.", "section": "typography" },
+      { "name": "The Dos Voces Rule", "body": "Shrikhand para lo que se lee de lejos (titulares, sabores, precios, marca, teléfono); Bricolage para todo lo demás. Shrikhand siempre en peso 400 y sin cursiva; el énfasis es de color (dorado), no de estilo.", "section": "typography" },
+      { "name": "The Sombra Teñida Rule", "body": "Ninguna sombra es gris neutra sobre algo dorado o verde: se tiñe del color que la proyecta. El negro se reserva para la canasta, que flota sobre contenido.", "section": "elevation" },
+      { "name": "The Lo Que Se Toca Es Pill Rule", "body": "Si responde al dedo y no es una tarjeta completa, es pill. Las tarjetas que son enlace (combos) llevan dentro su propio botón pill para que el gesto se vea.", "section": "shapes" }
+    ],
+    "dos": [
+      "**Do** usar la empanada de `#plantillaEmpanada` (vía `data-empanada`) cada vez que haga falta dibujar comida; nunca otra ilustración.",
+      "**Do** expresar fritura y atención animando `--d` (registrada con `@property`, 0 cruda, 1 dorada) en lugar de cambiar colores a mano.",
+      "**Do** mantener pill (999px) para lo tocable, 24px para superficies y 28px para fotos.",
+      "**Do** poner cada animación dentro de `prefers-reduced-motion: no-preference` y dejar un estado quieto y dorado para quien pide menos movimiento.",
+      "**Do** teñir sombras y halos del color que los proyecta (dorado o verde).",
+      "**Do** dar a Shrikhand interlineado de 1.08 o más y su `padding-bottom`.",
+      "**Do** escribir todo en español de Colombia, con el precio en formato `$3.000`."
+    ],
+    "donts": [
+      "**Don't** usar verde fuera de lo que abre WhatsApp.",
+      "**Don't** volver al cartel tipográfico de La Linterna (tintas fluorescentes, letras de madera, esquinas rectas): fue rechazado por no abrir el apetito.",
+      "**Don't** usar fondos negros puros, grises fríos o superficies blancas; la noche siempre es marrón tostado.",
+      "**Don't** poner Shrikhand en cursiva, en negrita sintética ni en texto corrido.",
+      "**Don't** usar íconos de fuente ni emojis como íconos; los íconos son símbolos SVG inline con `currentColor`."
+    ]
+  }
+}
