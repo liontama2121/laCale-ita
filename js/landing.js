@@ -36,7 +36,7 @@
   revelables.forEach(function (el) { el.setAttribute('data-revelar', ''); });
   var filasSabor = Array.prototype.slice.call(document.querySelectorAll('.sabor'));
 
-  if ('IntersectionObserver' in window && !sinMovimiento) {
+  if ('IntersectionObserver' in window) {
     var observadorRevelar = new IntersectionObserver(function (entradas, obs) {
       entradas.forEach(function (e) {
         if (!e.isIntersecting) return;
@@ -51,7 +51,7 @@
       entradas.forEach(function (e) {
         if (!e.isIntersecting) return;
         var i = filasSabor.indexOf(e.target);
-        e.target.style.transitionDelay = (i * 0.12) + 's';
+        e.target.style.setProperty('--retraso', (i * 0.12) + 's');
         e.target.classList.add('dorada');
         obs.unobserve(e.target);
       });
@@ -62,18 +62,20 @@
     filasSabor.forEach(function (el) { el.classList.add('dorada'); });
   }
 
-  /* ---------- Canasta: sueltas + combos, y el mensaje para WhatsApp ---------- */
+  /* ---------- Canasta: sueltas + combos ---------- */
   var COMBOS = { 4: 11000, 6: 17000 };
   var SABORES = filasSabor.map(function (f) { return f.getAttribute('data-sabor'); });
+  var canasta = document.getElementById('pedido');
   var resumen = document.getElementById('pedidoResumen');
-  var pista = document.getElementById('pedidoPista');
-  var btn = document.getElementById('pedidoBtn');
-  var btnTexto = document.getElementById('pedidoBtnTexto');
   var canastaIcono = document.getElementById('canastaIcono');
   var canastaN = document.getElementById('canastaN');
-  var listaCombos = document.getElementById('canastaCombos');
+  var finalLista = document.getElementById('finalLista');
+  var finalVacio = document.getElementById('finalVacio');
+  var finalTotal = document.getElementById('finalTotal');
+  var pista = document.getElementById('pedidoPista');
   var cantidades = {};
   var combosEnCanasta = []; // [{ tipo: 4, sabores: { 'Queso': 2, ... } }]
+  var finalEnPantalla = false;
 
   function plural(n, uno, varios) { return n + ' ' + (n === 1 ? uno : varios); }
 
@@ -92,86 +94,114 @@
     return svg;
   }
 
-  function pintarCombosCanasta(resaltarUltimo) {
-    listaCombos.textContent = '';
-    combosEnCanasta.forEach(function (combo, i) {
-      var li = document.createElement('li');
-      li.className = 'canasta-combo' + (resaltarUltimo && i === combosEnCanasta.length - 1 ? ' recien' : '');
-      var fuerte = document.createElement('strong');
-      fuerte.textContent = 'Combo x' + combo.tipo + ':';
-      var texto = document.createElement('span');
-      texto.textContent = textoSabores(combo.sabores);
-      var quitar = document.createElement('button');
-      quitar.type = 'button';
-      quitar.className = 'canasta-quitar';
-      quitar.setAttribute('aria-label', 'Quitar combo x' + combo.tipo + ' de la canasta');
-      quitar.appendChild(icono('icono-cerrar'));
-      quitar.addEventListener('click', function () {
-        combosEnCanasta.splice(i, 1);
-        pintarPedido();
-        saltarCanasta();
-      });
-      var linea = document.createElement('span');
-      linea.appendChild(fuerte);
-      linea.appendChild(document.createTextNode(' '));
-      linea.appendChild(texto);
-      li.appendChild(linea);
-      li.appendChild(quitar);
-      listaCombos.appendChild(li);
+  // Calcula todo lo que hay en la canasta
+  function leerPedido() {
+    var lineas = [];
+    var sueltas = 0;
+    var precio = 0;
+    SABORES.forEach(function (sabor) {
+      var n = cantidades[sabor] || 0;
+      if (!n) return;
+      sueltas += n;
+      precio += n * PRECIO_UNIDAD;
+      lineas.push({ tipo: 'suelta', sabor: sabor, n: n, precio: n * PRECIO_UNIDAD });
     });
+    var enCombos = 0;
+    combosEnCanasta.forEach(function (combo, i) {
+      enCombos += combo.tipo;
+      precio += COMBOS[combo.tipo];
+      lineas.push({ tipo: 'combo', indice: i, combo: combo, precio: COMBOS[combo.tipo] });
+    });
+    return { lineas: lineas, sueltas: sueltas, total: sueltas + enCombos, precio: precio };
+  }
+
+  function botonQuitar(etiqueta, alQuitar) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'canasta-quitar';
+    b.setAttribute('aria-label', etiqueta);
+    b.appendChild(icono('icono-cerrar'));
+    b.addEventListener('click', alQuitar);
+    return b;
+  }
+
+  function pintarFinal(pedido, resaltarUltimo) {
+    finalLista.textContent = '';
+    pedido.lineas.forEach(function (l, i) {
+      var li = document.createElement('li');
+      li.className = 'final-linea' + (resaltarUltimo && i === pedido.lineas.length - 1 ? ' recien' : '');
+      var texto = document.createElement('span');
+      var fuerte = document.createElement('strong');
+      var quitar;
+      if (l.tipo === 'suelta') {
+        fuerte.textContent = l.n + ' ';
+        texto.appendChild(fuerte);
+        texto.appendChild(document.createTextNode(l.sabor));
+        quitar = botonQuitar('Quitar ' + l.sabor.toLowerCase() + ' del pedido', function () {
+          cantidades[l.sabor] = 0;
+          pintarPedido();
+        });
+      } else {
+        fuerte.textContent = 'Combo x' + l.combo.tipo + ': ';
+        texto.appendChild(fuerte);
+        texto.appendChild(document.createTextNode(textoSabores(l.combo.sabores)));
+        quitar = botonQuitar('Quitar combo x' + l.combo.tipo + ' del pedido', function () {
+          combosEnCanasta.splice(l.indice, 1);
+          pintarPedido();
+        });
+      }
+      var precio = document.createElement('span');
+      precio.className = 'precio';
+      precio.textContent = formatoCOP(l.precio);
+      li.appendChild(texto);
+      li.appendChild(precio);
+      li.appendChild(quitar);
+      finalLista.appendChild(li);
+    });
+
+    finalVacio.hidden = pedido.total > 0;
+    finalTotal.hidden = pedido.total === 0;
+    if (pedido.total) {
+      finalTotal.textContent = '';
+      var etiqueta = document.createElement('span');
+      etiqueta.textContent = 'Total, ' + plural(pedido.total, 'empanada', 'empanadas');
+      var valor = document.createElement('strong');
+      valor.textContent = formatoCOP(pedido.precio);
+      finalTotal.appendChild(etiqueta);
+      finalTotal.appendChild(valor);
+    }
+    if (pedido.sueltas >= 4) {
+      pista.hidden = false;
+      pista.innerHTML = 'Con 4 o más sueltas te sale mejor un combo. <a href="#combos">Ármalo aquí</a>.';
+    } else {
+      pista.hidden = true;
+    }
   }
 
   function pintarPedido(resaltarUltimo) {
-    var sueltas = 0;
-    var lineasMsg = [];
+    var pedido = leerPedido();
     filasSabor.forEach(function (fila) {
-      var sabor = fila.getAttribute('data-sabor');
-      var n = cantidades[sabor] || 0;
-      sueltas += n;
+      var n = cantidades[fila.getAttribute('data-sabor')] || 0;
       fila.querySelector('.sabor-cant').textContent = n;
       fila.querySelector('[data-accion="menos"]').disabled = n === 0;
       fila.querySelector('[data-accion="mas"]').disabled = n >= MAX_POR_SABOR;
       fila.classList.toggle('escogido', n > 0);
-      if (n > 0) lineasMsg.push('- ' + n + ' ' + sabor);
     });
 
-    var enCombos = 0;
-    var precio = sueltas * PRECIO_UNIDAD;
-    combosEnCanasta.forEach(function (combo) {
-      enCombos += combo.tipo;
-      precio += COMBOS[combo.tipo];
-      lineasMsg.push('- Combo x' + combo.tipo + ': ' + textoSabores(combo.sabores));
-    });
-    var total = sueltas + enCombos;
-    canastaN.textContent = total;
-    pintarCombosCanasta(resaltarUltimo);
-
-    var mensaje;
-    if (total === 0) {
-      resumen.textContent = 'Tu canasta está vacía. Mezcla los sabores como quieras.';
-      pista.hidden = true;
-      btnTexto.textContent = 'Pedir por WhatsApp';
-      mensaje = 'Hola Caleñita, quiero pedir empanadas';
-    } else {
-      var partes = [];
-      if (sueltas) partes.push(plural(sueltas, 'suelta', 'sueltas'));
-      if (combosEnCanasta.length) partes.push(plural(combosEnCanasta.length, 'combo', 'combos'));
-      resumen.textContent = '';
+    canastaN.textContent = pedido.total;
+    resumen.textContent = '';
+    if (pedido.total) {
       var fuerte = document.createElement('strong');
-      fuerte.textContent = plural(total, 'empanada', 'empanadas');
+      fuerte.textContent = plural(pedido.total, 'empanada', 'empanadas');
       resumen.appendChild(fuerte);
-      resumen.appendChild(document.createTextNode(' (' + partes.join(' y ') + '): ' + formatoCOP(precio)));
-      if (sueltas >= 4) {
-        pista.hidden = false;
-        pista.innerHTML = 'Con <strong>4 o más sueltas</strong> te sale mejor un combo. Ármalo en <a href="#combos">Combos</a>.';
-      } else {
-        pista.hidden = true;
-      }
-      btnTexto.textContent = 'Pedir ' + total + ' por WhatsApp';
-      mensaje = 'Hola Caleñita, quiero pedir:\n' + lineasMsg.join('\n') +
-        '\nTotal: ' + plural(total, 'empanada', 'empanadas') + ', ' + formatoCOP(precio);
+      resumen.appendChild(document.createTextNode(' ' + formatoCOP(pedido.precio)));
     }
-    btn.href = 'https://wa.me/' + WA_NUMERO + '?text=' + encodeURIComponent(mensaje);
+    canasta.hidden = pedido.total === 0;
+    canasta.classList.toggle('escondida', finalEnPantalla);
+    document.body.classList.toggle('con-canasta', pedido.total > 0);
+
+    pintarFinal(pedido, resaltarUltimo);
+    revisarEnvio();
   }
 
   function saltarCanasta() {
@@ -220,11 +250,107 @@
       var suma = boton.getAttribute('data-accion') === 'mas';
       cantidades[sabor] = Math.max(0, Math.min(MAX_POR_SABOR, cantidades[sabor] + (suma ? 1 : -1)));
       pintarPedido();
-      if (suma) volar(fila.querySelector('.sabor-dibujo'), canastaIcono, saltarCanasta);
+      // La barra acaba de aparecer: esperar un cuadro para medir hacia dónde volar
+      if (suma) requestAnimationFrame(function () {
+        volar(fila.querySelector('.sabor-dibujo'), canastaIcono, saltarCanasta);
+      });
       else saltarCanasta();
     });
   });
-  if (filasSabor.length && resumen && btn) pintarPedido();
+
+  /* ---------- Tu pedido: datos de entrega y envío por WhatsApp ---------- */
+  var form = document.getElementById('formPedido');
+  var btnEnviar = document.getElementById('btnEnviar');
+  var btnEnviarTexto = document.getElementById('btnEnviarTexto');
+  var finalAyuda = document.getElementById('finalAyuda');
+  var CAMPOS = ['nombre', 'conjunto', 'torre', 'apto', 'notas'];
+  var OBLIGATORIOS = { nombre: 'cNombre', conjunto: 'cConjunto', apto: 'cApto' };
+  var CLAVE_CLIENTE = 'calenita_landing_cliente';
+
+  function valor(nombre) { return form.elements[nombre].value.trim(); }
+
+  function revisarEnvio() {
+    if (!form) return;
+    var pedido = leerPedido();
+    btnEnviar.disabled = pedido.total === 0;
+    btnEnviarTexto.textContent = pedido.total
+      ? 'Enviar pedido por WhatsApp'
+      : 'Primero escoge tus empanadas';
+  }
+
+  function validar() {
+    var primero = null;
+    Object.keys(OBLIGATORIOS).forEach(function (nombre) {
+      var input = document.getElementById(OBLIGATORIOS[nombre]);
+      var error = document.getElementById(OBLIGATORIOS[nombre] + 'Error');
+      var falta = !valor(nombre);
+      input.setAttribute('aria-invalid', String(falta));
+      if (falta) input.setAttribute('aria-describedby', error.id);
+      else input.removeAttribute('aria-describedby');
+      error.hidden = !falta;
+      if (falta && !primero) primero = input;
+    });
+    if (primero) primero.focus();
+    return !primero;
+  }
+
+  function armarMensaje() {
+    var pedido = leerPedido();
+    var lineas = pedido.lineas.map(function (l) {
+      return l.tipo === 'suelta'
+        ? '- ' + l.n + ' ' + l.sabor
+        : '- Combo x' + l.combo.tipo + ': ' + textoSabores(l.combo.sabores);
+    });
+    var direccion = 'Conjunto ' + valor('conjunto') +
+      (valor('torre') ? ', torre ' + valor('torre') : '') +
+      ', apto ' + valor('apto');
+    var texto = 'Hola Caleñita, quiero hacer este pedido:\n' + lineas.join('\n') +
+      '\nTotal: ' + plural(pedido.total, 'empanada', 'empanadas') + ', ' + formatoCOP(pedido.precio) +
+      '\n\nNombre: ' + valor('nombre') +
+      '\nDirección: ' + direccion;
+    if (valor('notas')) texto += '\nNotas: ' + valor('notas');
+    return texto;
+  }
+
+  if (form) {
+    // Recordar los datos de quien ya pidió (solo en este navegador)
+    try {
+      var guardado = JSON.parse(localStorage.getItem(CLAVE_CLIENTE) || '{}');
+      CAMPOS.forEach(function (c) {
+        if (c !== 'notas' && guardado[c]) form.elements[c].value = guardado[c];
+      });
+    } catch (e) { /* sin almacenamiento: no pasa nada */ }
+
+    form.addEventListener('input', function (e) {
+      var id = e.target.id;
+      var error = document.getElementById(id + 'Error');
+      if (error && e.target.value.trim()) {
+        error.hidden = true;
+        e.target.setAttribute('aria-invalid', 'false');
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (leerPedido().total === 0) return;
+      if (!validar()) {
+        finalAyuda.textContent = 'Falta tu dirección para poder enviar el pedido.';
+        return;
+      }
+      try {
+        var datos = {};
+        CAMPOS.forEach(function (c) { if (c !== 'notas') datos[c] = valor(c); });
+        localStorage.setItem(CLAVE_CLIENTE, JSON.stringify(datos));
+      } catch (err) { /* sin almacenamiento */ }
+      finalAyuda.textContent = 'Abriendo WhatsApp con tu pedido. Solo le das enviar.';
+      var url = 'https://wa.me/' + WA_NUMERO + '?text=' + encodeURIComponent(armarMensaje());
+      var ventana = window.open(url, '_blank');
+      if (ventana) ventana.opener = null;
+      else window.location.href = url;
+    });
+  }
+
+  if (filasSabor.length && resumen) pintarPedido();
 
   /* ---------- Armador de combos: escoger exactamente 4 o 6 sabores ---------- */
   var armador = document.getElementById('armador');
@@ -365,25 +491,18 @@
       armado = { tipo: armado.tipo, orden: [] };
       cerrarArmador();
       pintarPedido(true);
-      // Llevar a la persona a su canasta, donde ya aparece el combo
-      document.getElementById('pedido').scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'center' });
-      setTimeout(saltarCanasta, sinMovimiento ? 0 : 600);
+      // El combo vuela desde su tarjeta hasta la canasta
+      var tarjeta = document.querySelector('[data-combo="' + combosEnCanasta[combosEnCanasta.length - 1].tipo + '"] .abanico');
+      requestAnimationFrame(function () { volar(tarjeta, canastaIcono, saltarCanasta); });
     });
   }
 
-  /* ---------- WhatsApp flotante: escondido donde ya hay un botón de pedir ---------- */
-  var flotante = document.getElementById('waFlotante');
-  var vigilados = [document.querySelector('.hero-accion'), document.getElementById('menu')].filter(Boolean);
-  if (flotante && vigilados.length && 'IntersectionObserver' in window) {
-    var visibles = new Set();
-    var observadorFlotante = new IntersectionObserver(function (entradas) {
-      entradas.forEach(function (e) {
-        if (e.isIntersecting) visibles.add(e.target); else visibles.delete(e.target);
-      });
-      flotante.classList.toggle('oculto', visibles.size > 0);
-    }, { threshold: 0.1 });
-    vigilados.forEach(function (el) { observadorFlotante.observe(el); });
-  } else if (flotante) {
-    flotante.classList.remove('oculto');
+  /* ---------- La barra de canasta se esconde mientras se ve "Tu pedido" ---------- */
+  var seccionFinal = document.getElementById('finalizar');
+  if (seccionFinal && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entradas) {
+      finalEnPantalla = entradas[0].isIntersecting;
+      canasta.classList.toggle('escondida', finalEnPantalla);
+    }, { rootMargin: '0px 0px -45% 0px' }).observe(seccionFinal);
   }
 })();

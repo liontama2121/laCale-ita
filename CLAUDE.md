@@ -103,7 +103,9 @@ el nombre tal como está guardado. El input `#pCliente` tiene `<datalist>` con s
 solo si están vacíos. Nada de esto modifica pedidos viejos.
 
 ## WhatsApp
-3160996970 (enlaces `wa.me/573160996970` en `index.html`)
+3160996970 (`WA_NUMERO` en `js/landing.js`). La landing NO tiene enlaces directos a WhatsApp: "Hacer pedido" lleva a
+escoger sabores/combos, y solo el formulario "Tu pedido" (nombre, conjunto, torre, apto, notas) abre `wa.me` con el pedido
+completo. Los datos de la clienta se recuerdan en `localStorage['calenita_landing_cliente']`.
 
 ## Backup
 Con D1 los datos ya no dependen de un solo navegador, pero el export sigue sirviendo de respaldo frío.
@@ -122,9 +124,10 @@ en todos los pedidos; los pedidos nuevos vuelven a recibir número.
 
 ## Reglas de estilo
 - **Landing** (`index.html`, `css/landing.css`): "La freidora de noche". Fondo oscuro cálido, aceite dorado,
-  empanadas SVG que se doran en vivo (plantilla `#plantillaEmpanada`, grado de fritura con `@property --d`).
+  empanadas SVG que se doran en vivo (plantilla `#plantillaEmpanada`: capa cruda + capa `.emp-dorada`; freír = subir la opacidad de la dorada).
   Shrikhand para titulares, Bricolage Grotesque para texto. Verde solo para pedir por WhatsApp.
-  Botones pill, superficies a 24px. Animaciones respetan `prefers-reduced-motion`.
+  Botones pill, superficies a 24px. Con `prefers-reduced-motion` se quitan saltos y vuelos pero siguen dorado, burbujas y vapor;
+  `shared.css` mata toda animación en ese modo, así que `landing.css` devuelve esas duraciones con `!important`.
   Variables bajo `.landing` en `landing.css` (no tocan el panel). Diseño en `DESIGN.md`, producto en `PRODUCT.md`.
 - **Panel/login**: Fredoka para títulos, Nunito para cuerpo, botones pill (`css/shared.css`).
 - Mobile-first, botones mínimo 48px

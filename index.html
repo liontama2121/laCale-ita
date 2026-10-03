@@ -23,7 +23,7 @@
       <nav class="nav-links" aria-label="Navegación principal">
         <a href="#menu">Sabores</a>
         <a href="#combos">Combos</a>
-        <a href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20pedir%20empanadas" target="_blank" rel="noopener" class="btn-pedir btn-pedir-chico">Pedir</a>
+        <a href="#menu" class="btn-hacer btn-hacer-chico">Hacer pedido</a>
       </nav>
     </div>
   </header>
@@ -37,10 +37,9 @@
           <p class="hero-sub">Papa carne, papa pollo, ranchera, queso y mexicana. Te llegan calienticas al apto.</p>
           <div class="hero-accion">
             <p class="hero-precio"><strong>$3.000</strong> <span>c/u</span></p>
-            <a href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20pedir%20empanadas"
-               target="_blank" rel="noopener" class="btn-pedir btn-pedir-grande">
-              <svg class="wa-icono" viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-wa"/></svg>
-              Pedir por WhatsApp
+            <a href="#menu" class="btn-hacer btn-hacer-grande">
+              Hacer mi pedido
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg>
             </a>
           </div>
         </div>
@@ -150,22 +149,6 @@
           </li>
         </ul>
 
-        <div class="canasta" id="pedido">
-          <div class="canasta-icono" id="canastaIcono" aria-hidden="true">
-            <svg viewBox="0 0 64 48"><use href="#icono-canasta"/></svg>
-            <span class="canasta-n" id="canastaN">0</span>
-          </div>
-          <div class="canasta-texto">
-            <p class="pedido-resumen" id="pedidoResumen" aria-live="polite">Tu canasta está vacía. Mezcla los sabores como quieras.</p>
-            <ul class="canasta-combos" id="canastaCombos"></ul>
-            <p class="pedido-pista" id="pedidoPista" hidden></p>
-          </div>
-          <a href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20pedir%20empanadas"
-             target="_blank" rel="noopener" class="btn-pedir btn-pedir-grande" id="pedidoBtn">
-            <svg class="wa-icono" viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-wa"/></svg>
-            <span id="pedidoBtnTexto">Pedir por WhatsApp</span>
-          </a>
-        </div>
       </div>
     </section>
 
@@ -209,14 +192,61 @@
       </div>
     </section>
 
+    <!-- ============ TU PEDIDO: resumen + datos + WhatsApp ============ -->
+    <section class="final" id="finalizar" aria-labelledby="finalTitulo">
+      <div class="marco final-inner">
+        <h2 class="sec-titulo" id="finalTitulo">Tu pedido</h2>
+
+        <div class="final-resumen">
+          <ul class="final-lista" id="finalLista"></ul>
+          <p class="final-vacio" id="finalVacio">Tu canasta está vacía. <a href="#menu">Escoge tus sabores</a> o <a href="#combos">arma un combo</a>.</p>
+          <p class="final-total" id="finalTotal" hidden></p>
+          <p class="pedido-pista" id="pedidoPista" hidden></p>
+        </div>
+
+        <form class="final-form" id="formPedido" novalidate>
+          <div class="campo campo-ancho">
+            <label for="cNombre">Tu nombre</label>
+            <input id="cNombre" name="nombre" type="text" autocomplete="name" required>
+            <p class="campo-error" id="cNombreError" hidden>Escribe tu nombre para que Lina sepa de quién es.</p>
+          </div>
+          <div class="campo campo-ancho">
+            <label for="cConjunto">Conjunto</label>
+            <input id="cConjunto" name="conjunto" type="text" autocomplete="address-line1" required>
+            <p class="campo-error" id="cConjuntoError" hidden>Escribe el nombre del conjunto.</p>
+          </div>
+          <div class="campo">
+            <label for="cTorre">Torre <span class="campo-opcional">(si aplica)</span></label>
+            <input id="cTorre" name="torre" type="text" inputmode="numeric" autocomplete="address-line2">
+          </div>
+          <div class="campo">
+            <label for="cApto">Apartamento</label>
+            <input id="cApto" name="apto" type="text" inputmode="numeric" required>
+            <p class="campo-error" id="cAptoError" hidden>Escribe el número de apartamento.</p>
+          </div>
+          <div class="campo campo-ancho">
+            <label for="cNotas">Algo más para Lina <span class="campo-opcional">(opcional)</span></label>
+            <textarea id="cNotas" name="notas" rows="2" placeholder="Ej: para las 7 p. m., timbrar dos veces"></textarea>
+          </div>
+          <div class="final-enviar campo-ancho">
+            <button type="submit" class="btn-pedir btn-pedir-grande" id="btnEnviar">
+              <svg class="wa-icono" viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-wa"/></svg>
+              <span id="btnEnviarTexto">Enviar pedido por WhatsApp</span>
+            </button>
+            <p class="final-ayuda" id="finalAyuda" aria-live="polite">Se abre WhatsApp con tu pedido listo. Solo le das enviar.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
     <!-- ============ CÓMO PEDIR ============ -->
     <section class="ruta" id="como-pedir" aria-labelledby="rutaTitulo">
       <div class="marco">
         <h2 class="sec-titulo" id="rutaTitulo">Así de fácil</h2>
         <ol class="ruta-pasos">
-          <li><strong>Escríbele a Lina</strong> por WhatsApp con tus sabores.</li>
-          <li><strong>Dile dónde vives:</strong> conjunto, torre y apartamento.</li>
-          <li><strong>Llegan calienticas</strong> con su salsita a tu puerta.</li>
+          <li><strong>Escoge tus empanadas</strong> sueltas o en combo.</li>
+          <li><strong>Escribe dónde vives:</strong> conjunto, torre y apartamento.</li>
+          <li><strong>Envíalo por WhatsApp</strong> y te llegan calienticas con su salsita.</li>
         </ol>
       </div>
     </section>
@@ -226,8 +256,8 @@
   <footer class="pie">
     <div class="marco pie-inner">
       <p class="pie-marca">La Caleñita <span>Delicias Vallunas</span></p>
-      <a href="https://wa.me/573160996970" target="_blank" rel="noopener" class="pie-tel" aria-label="Pedidos por WhatsApp al 316 099 6970">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-wa"/></svg>
+      <a href="tel:+573160996970" class="pie-tel" aria-label="Llamar a La Caleñita al 316 099 6970">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-tel"/></svg>
         <strong>316 099 6970</strong>
       </a>
       <p class="pie-redes">Instagram y TikTok: @lacalenita (muy pronto)</p>
@@ -235,30 +265,34 @@
     </div>
   </footer>
 
-  <!-- ============ WHATSAPP FLOTANTE ============ -->
-  <a href="https://wa.me/573160996970?text=Hola%20Cale%C3%B1ita,%20quiero%20pedir%20empanadas"
-     target="_blank" rel="noopener" class="wa-flotante oculto" aria-label="Pedir por WhatsApp" id="waFlotante">
-    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><use href="#icono-wa"/></svg>
-  </a>
+  <!-- ============ CANASTA: aparece al escoger la primera empanada ============ -->
+  <div class="canasta" id="pedido" hidden>
+    <div class="canasta-icono" id="canastaIcono" aria-hidden="true">
+      <svg viewBox="0 0 64 48"><use href="#icono-canasta"/></svg>
+      <span class="canasta-n" id="canastaN">0</span>
+    </div>
+    <p class="pedido-resumen" id="pedidoResumen" aria-live="polite"></p>
+    <a href="#finalizar" class="btn-hacer" id="btnContinuar">
+      Continuar
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icono-flecha"/></svg>
+    </a>
+  </div>
 
   <!-- Empanada ilustrada: landing.js la copia en cada [data-empanada] -->
   <template id="plantillaEmpanada">
-    <svg class="empanada" viewBox="0 0 200 120" aria-hidden="true">
-      <path class="masa masa-cruda" d="M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z"/>
-      <path class="masa masa-dorada" d="M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z"/>
-      <path class="brillo" d="M44 52 C 60 30, 90 22, 118 24" fill="none" stroke-width="7" stroke-linecap="round"/>
-      <g class="grumos">
-        <circle cx="70" cy="48" r="3"/><circle cx="104" cy="40" r="2.5"/><circle cx="132" cy="56" r="3"/>
-        <circle cx="86" cy="70" r="2.5"/><circle cx="150" cy="78" r="2"/><circle cx="56" cy="78" r="2.5"/>
-        <circle cx="118" cy="80" r="2"/><circle cx="96" cy="58" r="1.8"/>
-      </g>
-      <g class="repulgue">
-        <circle cx="22" cy="97" r="7"/><circle cx="40" cy="100" r="7"/><circle cx="58" cy="102" r="7"/>
-        <circle cx="76" cy="103" r="7"/><circle cx="94" cy="104" r="7"/><circle cx="112" cy="104" r="7"/>
-        <circle cx="130" cy="103" r="7"/><circle cx="148" cy="102" r="7"/><circle cx="166" cy="100" r="7"/>
-        <circle cx="180" cy="97" r="6"/>
-      </g>
-    </svg>
+    <span class="empanada" aria-hidden="true">
+      <svg class="emp-capa emp-cruda" viewBox="0 0 200 120">
+        <path class="masa" d="M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z"/>
+        <path class="brillo" d="M44 52 C 60 30, 90 22, 118 24" fill="none" stroke-width="7" stroke-linecap="round"/>
+        <g class="repulgue"><circle cx="22" cy="97" r="7"/><circle cx="40" cy="100" r="7"/><circle cx="58" cy="102" r="7"/><circle cx="76" cy="103" r="7"/><circle cx="94" cy="104" r="7"/><circle cx="112" cy="104" r="7"/><circle cx="130" cy="103" r="7"/><circle cx="148" cy="102" r="7"/><circle cx="166" cy="100" r="7"/><circle cx="180" cy="97" r="6"/></g>
+      </svg>
+      <svg class="emp-capa emp-dorada" viewBox="0 0 200 120">
+        <path class="masa" d="M12 96 C 18 34, 66 10, 100 10 C 134 10, 182 34, 188 96 C 140 108, 60 108, 12 96 Z"/>
+        <path class="brillo" d="M44 52 C 60 30, 90 22, 118 24" fill="none" stroke-width="7" stroke-linecap="round"/>
+        <g class="grumos"><circle cx="70" cy="48" r="3"/><circle cx="104" cy="40" r="2.5"/><circle cx="132" cy="56" r="3"/><circle cx="86" cy="70" r="2.5"/><circle cx="150" cy="78" r="2"/><circle cx="56" cy="78" r="2.5"/><circle cx="118" cy="80" r="2"/><circle cx="96" cy="58" r="1.8"/></g>
+        <g class="repulgue"><circle cx="22" cy="97" r="7"/><circle cx="40" cy="100" r="7"/><circle cx="58" cy="102" r="7"/><circle cx="76" cy="103" r="7"/><circle cx="94" cy="104" r="7"/><circle cx="112" cy="104" r="7"/><circle cx="130" cy="103" r="7"/><circle cx="148" cy="102" r="7"/><circle cx="166" cy="100" r="7"/><circle cx="180" cy="97" r="6"/></g>
+      </svg>
+    </span>
   </template>
 
   <!-- Íconos -->
@@ -274,6 +308,9 @@
     </symbol>
     <symbol id="icono-flecha" viewBox="0 0 24 24">
       <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icono-tel" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/>
     </symbol>
     <symbol id="icono-cerrar" viewBox="0 0 24 24">
       <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>

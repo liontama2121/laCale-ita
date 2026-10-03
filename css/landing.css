@@ -68,6 +68,32 @@
 .btn-pedir:active { transform: translateY(1px) scale(0.98); }
 .btn-pedir-grande { min-height: 58px; padding: 14px 28px; font-size: 1.12rem; }
 .wa-icono { width: 24px; height: 24px; flex: none; }
+.btn-pedir:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* Hacer pedido: lleva a escoger. El verde queda solo para el envío final por WhatsApp. */
+.btn-hacer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: var(--dorado);
+  color: var(--noche);
+  font-weight: 800;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px -12px rgba(255, 201, 61, 0.6);
+  transition: transform 0.25s var(--ease-rebote), box-shadow 0.25s var(--ease-salida);
+}
+.btn-hacer svg { width: 20px; height: 20px; flex: none; transition: transform 0.25s var(--ease-salida); }
+.btn-hacer:hover { transform: translateY(-2px) scale(1.02); }
+.btn-hacer:hover svg { transform: translateX(3px); }
+.btn-hacer:active { transform: translateY(1px) scale(0.98); }
+.btn-hacer-chico { min-height: 44px; padding: 8px 18px; font-size: 0.95rem; }
+.btn-hacer-grande { min-height: 58px; padding: 14px 28px; font-size: 1.12rem; }
 
 /* ---------- Nav ---------- */
 .nav {
@@ -82,7 +108,7 @@
 .nav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
 .nav-marca { font-family: var(--f-display); font-size: 1.45rem; color: var(--dorado); text-decoration: none; line-height: 1.2; padding-bottom: 2px; }
 .nav-links { display: flex; align-items: center; gap: 22px; }
-.nav-links a:not(.btn-pedir) {
+.nav-links a:not(.btn-hacer) {
   color: var(--crema);
   font-weight: 600;
   text-decoration: underline;
@@ -91,8 +117,8 @@
   text-decoration-color: transparent;
   transition: text-decoration-color 0.2s;
 }
-.nav-links a:not(.btn-pedir):hover { text-decoration-color: var(--dorado); }
-@media (max-width: 480px) { .nav-links a:not(.btn-pedir) { display: none; } }
+.nav-links a:not(.btn-hacer):hover { text-decoration-color: var(--dorado); }
+@media (max-width: 480px) { .nav-links a:not(.btn-hacer) { display: none; } }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -235,14 +261,16 @@
 .vapor span:nth-child(3) { left: 46%; }
 .vapor span:nth-child(4) { left: 66%; }
 
-/* ---------- Empanada ilustrada ---------- */
-.empanada { display: block; width: 100%; height: auto; overflow: visible; }
-.empanada .masa-cruda { fill: #F4E1A6; }
-.empanada .masa-dorada { fill: #EE9A22; opacity: var(--d); }
-.empanada .grumos circle { fill: #B9560C; }
-.empanada .grumos { opacity: calc(var(--d) * 0.75); }
-.empanada .repulgue circle { fill: #E8B04E; }
-.empanada .repulgue { filter: brightness(calc(1 - var(--d) * 0.18)); }
+/* ---------- Empanada ilustrada ----------
+   Dos capas: cruda debajo, dorada encima. Freír = subir la opacidad de la capa dorada. */
+.empanada { position: relative; display: block; width: 100%; aspect-ratio: 200 / 120; }
+.emp-capa { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.emp-cruda .masa { fill: #F4E1A6; }
+.emp-cruda .repulgue circle { fill: #EBC874; }
+.emp-dorada { opacity: var(--d); }
+.emp-dorada .masa { fill: #EE9A22; }
+.emp-dorada .grumos circle { fill: #B9560C; opacity: 0.75; }
+.emp-dorada .repulgue circle { fill: #D98F2E; }
 .empanada .brillo { stroke: rgba(255, 246, 214, 0.55); }
 
 /* ---------- Plato: la foto real ---------- */
@@ -294,7 +322,6 @@
 .sabores { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 @media (min-width: 900px) { .sabores { grid-template-columns: 1fr 1fr; gap: 16px; } }
 .sabor {
-  --d: 0;
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr) auto;
   align-items: center;
@@ -303,9 +330,11 @@
   border-radius: var(--r-sup);
   background: var(--noche-2);
   border: 1px solid var(--borde-suave);
-  transition: --d 1.4s var(--ease-salida), background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.3s, border-color 0.3s;
 }
-.sabor.dorada { --d: 1; }
+/* Cada sabor entra crudo y se dora al aparecer (opacidad directa: funciona en todo navegador) */
+.sabor .emp-dorada { opacity: 0; transition: opacity 1.4s var(--ease-salida) var(--retraso, 0s); }
+.sabor.dorada .emp-dorada { opacity: 1; }
 .sabor.escogido { background: var(--noche-3); border-color: rgba(255, 201, 61, 0.5); }
 .sabor-dibujo { display: block; width: 76px; }
 .sabor-nombre { font-family: var(--f-display); font-size: clamp(1.35rem, 4.6vw, 1.8rem); line-height: 1.15; padding-bottom: 2px; }
@@ -335,29 +364,31 @@
   .sabor-control { gap: 2px; }
 }
 
-/* Canasta: se pega abajo mientras escoges */
+/* Canasta: barra fija abajo que aparece con la primera empanada */
 .canasta {
-  position: sticky;
+  position: fixed;
+  left: 12px;
+  right: 12px;
   bottom: 12px;
-  z-index: 50;
+  z-index: 300;
+  max-width: 720px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px 16px;
-  margin: 24px 0 0;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 12px 12px 12px 16px;
   border-radius: var(--r-sup);
-  background: rgba(42, 28, 16, 0.94);
+  background: rgba(42, 28, 16, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 201, 61, 0.35);
-  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 201, 61, 0.4);
+  box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.85);
+  transition: transform 0.4s var(--ease-salida), opacity 0.3s;
 }
-.canasta .btn-pedir { grid-column: 1 / -1; }
-@media (min-width: 768px) {
-  .canasta { grid-template-columns: auto minmax(0, 1fr) auto; padding: 16px 20px; }
-  .canasta .btn-pedir { grid-column: auto; }
-}
+.canasta[hidden] { display: grid !important; transform: translateY(140%); opacity: 0; pointer-events: none; visibility: hidden; }
+.canasta.escondida { transform: translateY(140%); opacity: 0; pointer-events: none; }
+.landing.con-canasta .pie { padding-bottom: 140px; }
 .canasta-icono { position: relative; width: 56px; color: var(--dorado); }
 .canasta-icono svg { width: 56px; height: 42px; display: block; }
 .canasta-icono.salto { animation: rebote-canasta 0.45s var(--ease-rebote); }
@@ -382,7 +413,7 @@
 .pedido-pista strong { color: var(--dorado); }
 
 /* Empanada que vuela a la canasta (la crea landing.js) */
-.voladora { position: fixed; z-index: 400; pointer-events: none; --d: 1; }
+.voladora { position: fixed; z-index: 400; pointer-events: none; }
 
 /* ---------- Combos ---------- */
 .combos-sec { padding: 104px 0 0; }
@@ -513,7 +544,8 @@
 .puesto-nombre { font-size: 0.78rem; font-weight: 600; color: var(--crema-suave); text-align: center; line-height: 1.15; min-height: 2.3em; overflow-wrap: anywhere; }
 .puesto.lleno .puesto-hueco { border-color: transparent; }
 @media (prefers-reduced-motion: no-preference) {
-  .puesto.nuevo .empanada { animation: caer-puesto 0.55s var(--ease-rebote), freir-rapido 1.2s var(--ease-salida); }
+  .puesto.nuevo .empanada { animation: caer-puesto 0.55s var(--ease-rebote); }
+  .puesto.nuevo .emp-dorada { animation: freir-rapido 1.2s var(--ease-salida); }
   .armador-puestos.completo .puesto { animation: menear 0.5s var(--ease-rebote); }
   .armador-puestos.completo .puesto:nth-child(2) { animation-delay: 0.05s; }
   .armador-puestos.completo .puesto:nth-child(3) { animation-delay: 0.1s; }
@@ -526,8 +558,8 @@
   to   { transform: none; opacity: 1; }
 }
 @keyframes freir-rapido {
-  from { --d: 0; }
-  to   { --d: 1; }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .armador-sabores { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -583,6 +615,76 @@
   100% { background: transparent; }
 }
 
+/* ---------- Tu pedido ---------- */
+.final { padding: 104px 0 0; }
+.final-inner { display: grid; gap: 28px; }
+@media (min-width: 900px) {
+  .final-inner { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: 48px; align-items: start; }
+  .final-inner .sec-titulo { grid-column: 1 / -1; margin-bottom: 0; }
+}
+.final-resumen {
+  padding: 22px 20px;
+  border-radius: var(--r-sup);
+  background: var(--noche-2);
+  border: 1px solid var(--borde-suave);
+}
+@media (min-width: 900px) { .final-resumen { position: sticky; top: 88px; } }
+.final-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.final-lista:empty { display: none; }
+.final-linea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+.final-linea strong { color: var(--dorado); }
+.final-linea .precio { font-weight: 800; font-variant-numeric: tabular-nums; }
+.final-linea.recien { animation: resaltar 1.4s var(--ease-salida); border-radius: 10px; }
+.final-vacio { margin: 0; color: var(--crema-suave); font-size: 1.05rem; }
+.final-vacio a, .pedido-pista a { color: var(--dorado); text-underline-offset: 4px; }
+.final-total {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde-suave);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.final-total strong { font-family: var(--f-display); font-weight: 400; font-size: 1.8rem; color: var(--dorado); line-height: 1.1; }
+.pedido-pista { margin: 12px 0 0; }
+
+.final-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }
+.campo { display: grid; gap: 6px; align-content: start; }
+.campo-ancho { grid-column: 1 / -1; }
+.campo label { font-weight: 800; font-size: 1rem; }
+.campo-opcional { font-weight: 400; color: var(--crema-suave); }
+.campo input, .campo textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 201, 61, 0.28);
+  background: var(--noche-2);
+  color: var(--crema);
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.campo textarea { resize: vertical; min-height: 80px; }
+.campo input::placeholder, .campo textarea::placeholder { color: #9C8B73; }
+.campo input:focus, .campo textarea:focus { outline: none; border-color: var(--dorado); box-shadow: 0 0 0 3px rgba(255, 201, 61, 0.25); }
+.campo input[aria-invalid="true"] { border-color: var(--aji); }
+.campo-error { margin: 0; color: #FF8A73; font-size: 0.95rem; font-weight: 600; }
+.final-enviar { display: grid; gap: 10px; justify-items: start; margin-top: 6px; }
+.final-ayuda { margin: 0; color: var(--crema-suave); }
+@media (max-width: 480px) {
+  .final-enviar .btn-pedir { justify-self: stretch; }
+}
+
 /* ---------- Así de fácil ---------- */
 .ruta { padding: 104px 0; }
 .ruta-pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; counter-reset: paso; }
@@ -629,25 +731,6 @@
 .pie-redes { margin: 0; color: var(--crema-suave); }
 .pie-credito { margin: 10px 0 0; padding-top: 16px; border-top: 1px solid var(--borde-suave); width: 100%; color: var(--crema-suave); }
 
-/* ---------- WhatsApp flotante ---------- */
-.wa-flotante {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 500;
-  width: 60px;
-  height: 60px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--verde);
-  color: #08240F;
-  box-shadow: 0 12px 30px -8px rgba(37, 211, 102, 0.6);
-  transition: transform 0.3s var(--ease-rebote), opacity 0.25s;
-}
-.wa-flotante:hover { transform: scale(1.08); }
-.wa-flotante.oculto { opacity: 0; transform: translateY(16px) scale(0.8); pointer-events: none; }
-
 /* ---------- Revelado al hacer scroll (landing.js marca .js en <html>) ---------- */
 .js [data-revelar] { transition: opacity 0.8s var(--ease-salida), transform 0.8s var(--ease-salida); }
 .js [data-revelar]:not(.visible) { opacity: 0; transform: translateY(28px); }
@@ -659,8 +742,9 @@
 @media (prefers-reduced-motion: no-preference) {
   .paila-resplandor { animation: latir 3.2s ease-in-out infinite; }
   .frita { animation: freir 9s var(--ease-salida) infinite; }
-  .frita-2 { animation-delay: -3s; }
-  .frita-3 { animation-delay: -6s; }
+  .frita .emp-dorada { animation: dorar-en-paila 9s linear infinite; }
+  .frita-2, .frita-2 .emp-dorada { animation-delay: -3s; }
+  .frita-3, .frita-3 .emp-dorada { animation-delay: -6s; }
   .burbujas i { animation: burbuja 1.9s ease-in infinite; }
   .burbujas i:nth-child(2n) { animation-duration: 2.4s; animation-delay: -0.6s; }
   .burbujas i:nth-child(3n) { animation-duration: 1.6s; animation-delay: -1.1s; }
@@ -681,18 +765,24 @@
 
 /* La empanada se hunde, se dora, salta del aceite y vuelve a entrar cruda */
 @keyframes freir {
-  0%   { transform: translateY(42%) rotate(-3deg); --d: 0; }
+  0%   { transform: translateY(42%) rotate(-3deg); }
   12%  { transform: translateY(30%) rotate(2deg); }
   24%  { transform: translateY(34%) rotate(-2deg); }
   36%  { transform: translateY(29%) rotate(2deg); }
   48%  { transform: translateY(33%) rotate(-1deg); }
-  60%  { transform: translateY(30%) rotate(1deg); --d: 1; }
-  70%  { transform: translateY(-48%) rotate(-12deg); --d: 1; }
+  60%  { transform: translateY(30%) rotate(1deg); }
+  70%  { transform: translateY(-48%) rotate(-12deg); }
   77%  { transform: translateY(-58%) rotate(8deg); }
-  86%  { transform: translateY(26%) rotate(-2deg); --d: 1; }
-  93%  { transform: translateY(60%) rotate(0deg); --d: 1; }
-  96%  { transform: translateY(60%) rotate(0deg); --d: 0; }
-  100% { transform: translateY(42%) rotate(-3deg); --d: 0; }
+  86%  { transform: translateY(26%) rotate(-2deg); }
+  93%  { transform: translateY(60%) rotate(0deg); }
+  96%  { transform: translateY(60%) rotate(0deg); }
+  100% { transform: translateY(42%) rotate(-3deg); }
+}
+/* La capa dorada sigue el mismo reloj de 9s que el salto */
+@keyframes dorar-en-paila {
+  0%, 4%   { opacity: 0; }
+  60%, 93% { opacity: 1; }
+  96%, 100% { opacity: 0; }
 }
 @keyframes burbuja {
   0%   { opacity: 0; transform: translateY(0) scale(0.3); }
@@ -724,9 +814,53 @@
   100% { transform: scale(1); }
 }
 
+/* Con "reducir movimiento" (o ahorro de batería en Android) nada salta ni vuela,
+   pero la paila sigue viva: las empanadas se doran, hay burbujas y vapor. */
 @media (prefers-reduced-motion: reduce) {
-  .sabor { --d: 1; }
   .frita { transform: translateY(30%); }
-  .js [data-revelar]:not(.visible) { opacity: 1; transform: none; }
+  .frita .emp-dorada { animation: dorar-quieto 6s ease-in-out infinite; }
+  .frita-2 .emp-dorada { animation-duration: 7.4s; }
+  .frita-3 .emp-dorada { animation-duration: 8.6s; }
+  .burbujas i { animation: burbuja-suave 2.2s ease-in-out infinite; }
+  .burbujas i:nth-child(2n) { animation-delay: -0.7s; }
+  .burbujas i:nth-child(3n) { animation-delay: -1.4s; }
+  .vapor span, .plato-vapor span { animation: vapor-suave 5s ease-in-out infinite; }
+  .vapor span:nth-child(2), .plato-vapor span:nth-child(2) { animation-delay: -1.7s; }
+  .vapor span:nth-child(3), .plato-vapor span:nth-child(3) { animation-delay: -3.4s; }
+  .paila-resplandor { animation: brillar 3.2s ease-in-out infinite; }
+  .puesto.nuevo .emp-dorada { animation: freir-rapido 1.2s ease-out; }
+  .js [data-revelar] { transition: opacity 0.8s ease-out; }
+  .js [data-revelar]:not(.visible) { transform: none; }
   .abanico span { transition: none; }
+}
+/* shared.css (común con el panel) fuerza toda animación a 0.01ms con !important cuando hay
+   "reducir movimiento". Aquí se devuelven las duraciones solo a las animaciones suaves. */
+@media (prefers-reduced-motion: reduce) {
+  .landing .frita .emp-dorada { animation-duration: 6s !important; }
+  .landing .frita-2 .emp-dorada { animation-duration: 7.4s !important; }
+  .landing .frita-3 .emp-dorada { animation-duration: 8.6s !important; }
+  .landing .burbujas i { animation-duration: 2.2s !important; }
+  .landing .vapor span, .landing .plato-vapor span { animation-duration: 5s !important; }
+  .landing .paila-resplandor { animation-duration: 3.2s !important; }
+  .landing .puesto.nuevo .emp-dorada { animation-duration: 1.2s !important; }
+  .landing .canasta-icono.salto { animation-duration: 0.45s !important; }
+  .landing .canasta-combo.recien { animation-duration: 1.4s !important; }
+  .landing .sabor .emp-dorada { transition-duration: 1.4s !important; }
+  .landing [data-revelar] { transition-duration: 0.8s !important; }
+}
+@keyframes dorar-quieto {
+  0%, 100% { opacity: 0; }
+  50%, 80% { opacity: 1; }
+}
+@keyframes burbuja-suave {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+@keyframes vapor-suave {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.7; }
+}
+@keyframes brillar {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
