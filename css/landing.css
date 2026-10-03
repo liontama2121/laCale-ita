@@ -95,6 +95,39 @@
 .btn-hacer-chico { min-height: 44px; padding: 8px 18px; font-size: 0.95rem; }
 .btn-hacer-grande { min-height: 58px; padding: 14px 28px; font-size: 1.12rem; }
 
+/* ---------- Barra JuanCode (arriba de todo, se va al hacer scroll) ---------- */
+.barra-jc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #0A0604;
+  border-bottom: 1px solid var(--borde-suave);
+}
+.barra-jc-pregunta { font-size: 0.88rem; color: var(--crema-suave); }
+@media (max-width: 600px) { .barra-jc-pregunta { display: none; } }
+.barra-jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 201, 61, 0.45);
+  background: rgba(255, 201, 61, 0.08);
+  color: var(--crema);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.25s var(--ease-rebote);
+}
+.barra-jc-btn strong { color: var(--dorado); font-weight: 800; }
+.barra-jc-btn svg { width: 16px; height: 16px; transition: transform 0.25s var(--ease-salida); }
+.barra-jc-btn:hover { background: rgba(255, 201, 61, 0.16); border-color: var(--dorado); transform: translateY(-1px); }
+.barra-jc-btn:hover svg { transform: translateX(3px); }
+
 /* ---------- Nav ---------- */
 .nav {
   position: sticky;
@@ -107,9 +140,6 @@
 }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
 .nav-marca { font-family: var(--f-display); font-size: 1.45rem; color: var(--dorado); text-decoration: none; line-height: 1.2; padding-bottom: 2px; }
-.nav-firma { display: grid; gap: 1px; line-height: 1; }
-.nav-autor { justify-self: start; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; color: var(--crema-suave); padding-left: 2px; text-decoration: none; transition: color 0.2s; }
-.nav-autor:hover { color: var(--dorado); text-decoration: underline; text-underline-offset: 3px; }
 .nav-links { display: flex; align-items: center; gap: 22px; }
 .nav-links a:not(.btn-hacer) {
   color: var(--crema);
